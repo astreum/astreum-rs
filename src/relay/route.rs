@@ -26,6 +26,12 @@ impl TryFrom<&[u8]> for RouteID {
 
 }
 
+impl Into<Vec<u8>> for RouteID {
+    fn into(self) -> Vec<u8> {
+        (&self).into()
+    }
+}
+
 impl Into<Vec<u8>> for &RouteID {
 
     fn into(self) -> Vec<u8> {
@@ -156,4 +162,12 @@ impl Route {
 
    }
 
+   pub fn size(&self) -> usize {
+
+        (&self.0)
+            .into_iter()
+            .map(|(_,bucket)| bucket.size())
+            .sum()
+
+   }
 }

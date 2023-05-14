@@ -99,7 +99,7 @@ impl TryFrom<&[u8]> for Envelope {
 
 	   } else {
 
-		   Err("Envelope fields error!")?
+		   Err("envelope fields error!")?
 
 	   }
 

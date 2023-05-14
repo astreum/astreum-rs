@@ -104,9 +104,13 @@ impl Relay {
 
                               match envelope.message.topic {
 
-                                 Topic::Object => { let _s = sender.send((ip_address, envelope.message)); },
+                                 Topic::Object => {
+                                    let _s = sender.send((ip_address, envelope.message));
+                                 },
 
-                                 Topic::ObjectRequest => { let _s = sender.send((ip_address, envelope.message)); },
+                                 Topic::ObjectRequest => {
+                                    let _s = sender.send((ip_address, envelope.message));
+                                 },
 
                                  Topic::Ping => {
 
@@ -266,11 +270,17 @@ impl Relay {
                                  
                                  },
 
-                                 Topic::State => { let _s = sender.send((ip_address, envelope.message)); },
+                                 Topic::State => {
+                                    let _s = sender.send((ip_address, envelope.message));
+                                 },
 
-                                 Topic::StateRequest => { let _s = sender.send((ip_address, envelope.message)); },
+                                 Topic::StateRequest => {
+                                    let _s = sender.send((ip_address, envelope.message));
+                                 },
 
-                                 Topic::Transaction => { let _s = sender.send((ip_address, envelope.message)); }
+                                 Topic::Transaction => {
+                                    let _s = sender.send((ip_address, envelope.message));
+                                 }
 
                               }
 
@@ -370,55 +380,43 @@ impl Relay {
 
                         Ok(mut outgoing_queue) => {
 
-                           if peers.is_empty() {
+                           let current_time = SystemTime::now()
+                              .duration_since(SystemTime::UNIX_EPOCH)
+                              .unwrap()
+                              .as_secs();
 
-                              for seeder in &seeders {
-         
-                                 outgoing_queue.push((*seeder, t4_ping_message.clone()));
-                     
-                              }
+                           let mut removable_peers = Vec::new();
 
-                           } else {
+                           for (ip_address, timestamp) in &*peers {
+                        
+                              if (current_time - timestamp) > 330 {
+                  
+                                 removable_peers.push(ip_address.clone());
 
-                              let current_time = SystemTime::now()
-                                 .duration_since(SystemTime::UNIX_EPOCH)
-                                 .unwrap()
-                                 .as_secs();
-
-                              let mut removable_peers = Vec::new();
-
-                              for (ip_address, timestamp) in &*peers {
-                           
-                                 if (current_time - timestamp) > 330 {
-                     
-                                    removable_peers.push(ip_address.clone());
-
-                                    match t4_peers_rt_pt.lock() {
-                                       Ok(mut peer_route) => peer_route.remove(&ip_address),
-                                       Err(_) => todo!(),
-                                    }
-
-                                    match t4_cs_rt_pt.lock() {
-                                       Ok(mut consensus_route) => consensus_route.remove(&ip_address),
-                                       Err(_) => todo!(),
-                                    }                                 
-                     
+                                 match t4_peers_rt_pt.lock() {
+                                    Ok(mut peer_route) => peer_route.remove(&ip_address),
+                                    Err(_) => todo!(),
                                  }
-                     
-                                 if (current_time - timestamp) > 300 {
-                                    
-                                    outgoing_queue.push((*ip_address, t4_ping_message.clone()));
 
-                                 }
-                     
+                                 match t4_cs_rt_pt.lock() {
+                                    Ok(mut consensus_route) => consensus_route.remove(&ip_address),
+                                    Err(_) => todo!(),
+                                 }                                 
+                  
                               }
-                     
-                              for removable in removable_peers {
-                     
-                                 peers.remove(&removable);
-                     
-                              }
+                  
+                              if (current_time - timestamp) > 300 {
+                                 
+                                 outgoing_queue.push((*ip_address, t4_ping_message.clone()));
 
+                              }
+                  
+                           }
+                  
+                           for removable in removable_peers {
+                  
+                              peers.remove(&removable);
+                  
                            }
 
                         }
@@ -442,7 +440,6 @@ impl Relay {
       });
 
       let relay = Relay {
-         routes: HashMap::new(),
          peers: HashMap::new(),
          secret_key,
          public_key,
@@ -452,6 +449,9 @@ impl Relay {
          peer_route_pointer,
          consensus_route_pointer,
          receiver_pointer,
+         relay_timeout: 10,
+         relay_threshold: 1,
+         seeders,
       };
 
       Ok(relay)
