@@ -2,12 +2,12 @@ use std::{collections::HashMap, net::IpAddr, sync::{Arc, Mutex, mpsc::Receiver}}
 pub mod broadcast;
 pub mod bucket;
 pub mod connect;
-pub mod send;
-pub mod route;
-pub mod ping;
+pub mod envelope;
 pub mod message;
 pub mod new;
-pub mod envelope;
+pub mod ping;
+pub mod route;
+pub mod send;
 pub mod topic;
 use route::Route;
 use message::Message;
