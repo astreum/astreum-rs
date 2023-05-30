@@ -1,4 +1,14 @@
-use std::{fmt, error::Error};
+use std::{fmt, error::Error, collections::BTreeMap, net::IpAddr};
+
+use super::{address::Address, block::Block};
+
+pub struct Chain {
+    pub accounts: BTreeMap<Address,[u8;32]>,
+    pub latest_block: Block,
+    pub error_block: [u8;32],
+    pub previous_blocks: Vec<[u8;32]>,
+    pub peers: Vec<IpAddr>
+}
 
 #[derive(Clone)]
 pub enum ChainID {
