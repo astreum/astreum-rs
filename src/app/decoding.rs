@@ -6,6 +6,8 @@ impl App {
 
     pub fn decoding(&self) -> Result<(), Box<dyn Error>> {
 
+        let ping_message = self.ping_message.clone();
+
         let incoming_queue_pointer = self.incoming_queue_pointer.clone();
 
         let peers_pointer = self.peers_pointer.clone();
@@ -85,7 +87,7 @@ impl App {
                                                                 
                                                                     Ok(mut outgoing_queue) => {
 
-                                                                        outgoing_queue.push((sender_ip_address, self.ping_message));
+                                                                        outgoing_queue.push((sender_ip_address, ping_message.clone()));
 
                                                                     },
                                                                     
@@ -168,7 +170,7 @@ impl App {
 
                                                             for sample_ip_address in sample_socket_addresses {
             
-                                                                outgoing_queue.push((sample_ip_address, self.ping_message.clone()));
+                                                                outgoing_queue.push((sample_ip_address, ping_message.clone()));
                     
                                                             }
 

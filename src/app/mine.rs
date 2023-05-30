@@ -1,10 +1,12 @@
-use std::{time::Instant, thread};
+use std::{time::Instant, thread, error::Error};
 
 use super::App;
 
 impl App {
 
-   pub fn mine(&self) {
+   pub fn mine(&self) -> Result<(), Box<dyn Error>> {
+
+      self.sync()?;
 
       thread::spawn(move || {
 
@@ -23,6 +25,8 @@ impl App {
          }
 
       });
+
+      Ok(())
       
    }
 

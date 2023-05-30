@@ -10,6 +10,10 @@ impl App {
 
       self.decoding()?;
 
+      self.outgoing()?;
+
+      self.liveness()?;
+
       thread::spawn(move || {
 
          let mut now = Instant::now();
