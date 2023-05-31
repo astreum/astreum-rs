@@ -28,8 +28,24 @@ Official Astreum Node written in Rust.
 
 ## Usage
 
+Ensure the following prerequisites are installed on your device,
+
+- Rust [Link](https://www.rust-lang.org/tools/install)
+- Git [Link](https://git-scm.com/downloads)
+
+Steps:
+
+- Clone the repo with `git clone https://github.com/astreum/astreum-rs.git`
+- Open the repo with `cd astreum-rs`
+- Run through Cargo with `cargo run [command]`
+
+CLI Commands:
+
+- help: Lists commands and descriptions
+- new: creates a new account
+
 ## Disclaimer
 
 ## License
 
-12023-05-30
+12023-05-31
