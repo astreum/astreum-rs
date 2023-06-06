@@ -1,4 +1,5 @@
 # Astreum Node
+
 ```
 *      .       *    .               *     .    *          *
 .  .        .           *    .     *  .            .
@@ -30,14 +31,15 @@ Official Astreum Node written in Rust.
 
 Ensure the following prerequisites are installed on your device,
 
-- Rust [Link](https://www.rust-lang.org/tools/install)
-- Git [Link](https://git-scm.com/downloads)
+- [Rust](https://www.rust-lang.org/tools/install)
+- [Git](https://git-scm.com/downloads)
 
 Steps:
 
 - Clone the repo with `git clone https://github.com/astreum/astreum-rs.git`
 - Open the repo with `cd astreum-rs`
 - Run through Cargo with `cargo run [command]`
+- Update repo with `git pull --all`
 
 CLI Commands:
 
@@ -48,4 +50,6 @@ CLI Commands:
 
 ## License
 
-12023-05-31
+MIT
+
+12023-06-06

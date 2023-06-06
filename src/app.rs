@@ -1,6 +1,6 @@
 use std::{sync::{Arc, Mutex}, net::{IpAddr, UdpSocket}, collections::HashMap};
 
-use self::{object::Object, chain::Chain, route::Route, peer::Peer, message::Message};
+use self::{object::Object, chain::Chain, route::Route, peer::Peer, message::Message, block::Block};
 
 pub mod account;
 pub mod address;
@@ -31,8 +31,7 @@ pub struct App {
    account_address: [u8;32],
    account_key: [u8;32],
    object_store_pointer: Arc<Mutex<neutrondb::Store<[u8;32], Object>>>,
-   chains: Vec<Chain>,
-   longest_chain: Chain,
+   latest_block: Block,
    relay_address: [u8;32],
    relay_key: [u8;32],
    peer_route_pointer: Arc<Mutex<Route>>,

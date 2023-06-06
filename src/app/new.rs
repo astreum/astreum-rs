@@ -61,13 +61,13 @@ impl App {
 			topic: Topic::Ping,
 		};
 
+		// get latest block hash and get block from objects store 
+
 		let app = App {
 			validator,
 			account_address,
 			account_key,
 			object_store_pointer: Arc::new(Mutex::new(objects_store)),
-			chains: todo!(),
-			longest_chain: todo!(),
 			relay_address,
 			relay_key,
 			peer_route_pointer,
@@ -77,9 +77,10 @@ impl App {
 			seeders,
 			puts_queue_pointer,
 			gets_queue_pointer,
-    		storage_index: todo!(),
+    		storage_index: HashMap::new(),
 			peers_pointer: Arc::new(Mutex::new(HashMap::new())),
-			ping_message
+			ping_message,
+			latest_block: todo!(),
 		};
 
 		todo!()

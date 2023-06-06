@@ -255,12 +255,13 @@ impl App {
 
                                             Topic::State => {
 
-                                                // extend chain
+                                                // if better than valid chain add to proposed chains
+                                                
                                             },
 
                                             Topic::StateRequest => {
 
-                                                // send longest chain latest block hash
+                                                // send longest valid chain hash
 
                                             },
 

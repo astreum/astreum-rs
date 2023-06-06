@@ -1,4 +1,4 @@
-use std::{error::Error, thread, time::Instant};
+use std::{error::Error, thread, time::Instant, sync::mpsc::channel};
 
 use super::App;
 
@@ -16,19 +16,15 @@ impl App {
 
       thread::spawn(move || {
 
-         let mut now = Instant::now();
-
          loop {
 
-            if Instant::now().duration_since(now).as_millis() > 1000 {
+            // choose valid chain 
 
-               //  select chain
-
-               // sync chain
-
-               now = Instant::now();
-
-            }
+            // check if valid chain is older than 1 sec:
+            
+               // check connection & reconnect
+               
+               // request chain info from network
              
          }
 
