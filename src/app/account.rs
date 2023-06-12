@@ -1,6 +1,6 @@
 use std::{collections::{BTreeMap, HashMap}, error::Error};
 
-use super::address::Address;
+use super::{address::Address, object::Object};
 
 #[derive(Clone,Debug)]
 pub struct Account {
@@ -100,6 +100,16 @@ impl Account {
             ]
         )
         
+    }
+
+    pub fn try_from_storage(
+        account_address: &[u8;32],
+        accounts_hash: &[u8;32],
+        object_store: &neutrondb::Store<[u8;32], Object>
+    ) -> Result<Account, Box<dyn Error>>{
+
+        todo!()
+
     }
 
 }

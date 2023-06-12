@@ -1,4 +1,4 @@
-use std::{fmt, error::Error, collections::BTreeMap, net::IpAddr};
+use std::{fmt, error::Error, collections::BTreeMap};
 
 use super::{address::Address, block::Block};
 

@@ -14,6 +14,7 @@ pub mod incoming;
 pub mod liveness;
 pub mod message;
 pub mod mine;
+pub mod miner;
 pub mod new;
 pub mod object;
 pub mod outgoing;
@@ -21,10 +22,11 @@ pub mod peer;
 pub mod ping;
 pub mod receipt;
 pub mod route;
+pub mod storage;
 pub mod sync;
 pub mod topic;
 pub mod transaction;
-pub mod validate;
+// pub mod validate;
 
 pub struct App {
    validator: bool,

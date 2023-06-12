@@ -1,88 +1,110 @@
 use std::error::Error;
 
-use super::{chain::ChainID, transaction::Transaction, address::Address};
+use super::{chain::ChainID, address::Address, object::Object};
 
 #[derive(Clone, Debug)]
 pub struct Block {
-   pub accounts_hash: [u8; 32],
-   pub block_hash: [u8; 32],
+   pub accounts: [u8; 32],
    pub chain_id: ChainID,
    pub data: Vec<u8>,
    pub delay_difficulty: u64,
    pub delay_output: Vec<u8>,
-   pub details_hash: [u8; 32],
+   pub hash: [u8; 32],
+   pub miner: Address,
    pub number: opis::Integer,
-   pub previous_block_hash: [u8; 32],
-   pub receipts_hash: [u8; 32],
+   pub previous_block: [u8; 32],
+   pub receipts: [u8; 32],
    pub signature: [u8; 64],
    pub solar_used: u64,
    pub time: u64,
-   pub transactions: Vec<Transaction>,
-   pub transactions_hash: [u8; 32],
-   pub validator: Address,
+   pub transactions: [u8; 32],
 }
 
 impl Block {
 
-   pub fn sign(&mut self, secret_key: &[u8; 32]) -> Result<(), Box<dyn Error>> {
+    pub fn new(chain_id: ChainID) -> Block {
 
-       self.signature = fides::ed25519::sign(&self.details_hash, secret_key)?;
+        Block {
+            accounts: [0_u8; 32],
+            hash: [0_u8; 32],
+            chain_id,
+            data: Vec::new(),
+            delay_difficulty: 1,
+            delay_output: Vec::new(),
+            number: opis::Integer::zero(),
+            previous_block: [0_u8; 32],
+            receipts: [0_u8; 32],
+            signature: [0_u8 ;64],
+            solar_used: 0,
+            time: 1,
+            transactions: [0_u8; 32],
+            miner: Address([0_u8; 32])
+        }
 
-       Ok(())
+    }
 
-   }
+    pub fn sign(&mut self, secret_key: &[u8; 32]) -> Result<(), Box<dyn Error>> {
 
-   pub fn update_details_hash(&mut self) {
+        self.signature = fides::ed25519::sign(&self.details_hash(), secret_key)?;
 
-      self.details_hash = self.details_hash()
-      
-  }
+        Ok(())
 
-  pub fn details_hash(&self) -> [u8; 32] {
+    }
 
-      let chain_bytes: Vec<u8> = (&self.chain_id).into();
+    pub fn details_hash(&self) -> [u8; 32] {
 
-      let delay_difficulty_bytes: Vec<u8> = opis::Integer::from(&self.delay_difficulty).into();
+        let chain_bytes: Vec<u8> = (&self.chain_id).into();
 
-      let number_bytes: Vec<u8> = (&self.number).into();
+        let delay_difficulty_bytes: Vec<u8> = opis::Integer::from(&self.delay_difficulty).into();
 
-      let solar_used_bytes: Vec<u8> = opis::Integer::from(&self.solar_used).into();
+        let number_bytes: Vec<u8> = (&self.number).into();
 
-      let time_bytes: Vec<u8> = opis::Integer::from(&self.time).into();
+        let solar_used_bytes: Vec<u8> = opis::Integer::from(&self.solar_used).into();
 
-      fides::merkle_tree::root(
-         fides::hash::blake_3,
-          &[
-              &self.accounts_hash,
-              &chain_bytes,
-              &self.data,
-              &delay_difficulty_bytes,
-              &self.delay_output,
-              &number_bytes,
-              &self.previous_block_hash,
-              &self.receipts_hash,
-              &self.signature,
-              &solar_used_bytes,
-              &time_bytes,
-              &self.transactions_hash,
-              &self.validator.0,
-          ]
-      )
-  
-   }
-  
-   pub fn update_block_hash(&mut self) {
-      
-      self.block_hash = self.block_hash()
-   
-   }
+        let time_bytes: Vec<u8> = opis::Integer::from(&self.time).into();
 
-   pub fn block_hash(&self) -> [u8; 32] {
+        fides::merkle_tree::root(
+            fides::hash::blake_3,
+            &[
+                &self.accounts,
+                &chain_bytes,
+                &self.data,
+                &delay_difficulty_bytes,
+                &self.delay_output,
+                &self.miner.0,
+                &number_bytes,
+                &self.previous_block,
+                &self.receipts,
+                &self.signature,
+                &solar_used_bytes,
+                &time_bytes,
+                &self.transactions,
+            ]
+        )
+    
+    }
+    
+    pub fn update_hash(&mut self) {
+        
+        self.hash = self.hash()
+    
+    }
 
-      fides::merkle_tree::root(fides::hash::blake_3, &[&self.details_hash, &self.signature])
+    pub fn hash(&self) -> [u8; 32] {
 
-   }
-   
+        fides::merkle_tree::root(fides::hash::blake_3, &[&self.details_hash(), &self.signature])
+
+    }
+    
+    pub fn try_from_storage(
+        block_hash: &[u8;32],
+        object_store: &neutrondb::Store<[u8;32], Object>
+    ) -> Result<Block, Box<dyn Error>>{
+
+        todo!()
+
+    }
+
 }
 
 impl TryFrom<&[u8]> for Block {
@@ -95,35 +117,21 @@ impl TryFrom<&[u8]> for Block {
 
        if block_details.len() == 16 {
 
-           let mut txs = Vec::new();
-
-           let txs_bytes = astro_format::decode(block_details[13])?;
-
-           for tx_bytes in txs_bytes {
-
-               let tx = Transaction::try_from(tx_bytes)?;
-
-               txs.push(tx)
-
-           };
-
            let block = Block {
-               accounts_hash: block_details[0].try_into().unwrap_or(Err("Accounts hash error!")?),
-               block_hash: block_details[1].try_into().unwrap_or(Err("Block hash error!")?),
+               accounts: block_details[0].try_into().unwrap_or(Err("Accounts hash error!")?),
+               hash: [0_u8;32],
                chain_id: ChainID::try_from(block_details[2]).unwrap_or(Err("Chain error!")?),
                data: block_details[3].to_vec(),
                delay_difficulty: u64::from_be_bytes(block_details[4].try_into().unwrap_or(Err("Block time error!")?)),
                delay_output: block_details[5].to_vec(),
-               details_hash: block_details[6].try_into().unwrap_or(Err("Details hash error!")?),
+               miner: block_details[15].clone().try_into().unwrap_or(Err("Validator error!")?),
                number: opis::Integer::try_from(block_details[7]).unwrap_or(Err("Number error!")?),
-               previous_block_hash: block_details[8].try_into().unwrap_or(Err("Previous block hash error!")?),
-               receipts_hash: block_details[9].try_into().unwrap_or(Err("Receipts hash error!")?),
+               previous_block: block_details[8].try_into().unwrap_or(Err("Previous block hash error!")?),
+               receipts: block_details[9].try_into().unwrap_or(Err("Receipts hash error!")?),
                signature: block_details[10].try_into().unwrap_or(Err("Signature error!")?),
                solar_used: (&opis::Integer::try_from(block_details[11]).unwrap_or(Err("Block number error!")?)).into(),
                time: u64::from_be_bytes(block_details[12].try_into().unwrap_or(Err("Block time error!")?)),
-               transactions: txs,
-               transactions_hash: block_details[14].clone().try_into().unwrap_or(Err("Validator error!")?),
-               validator: block_details[15].clone().try_into().unwrap_or(Err("Validator error!")?),
+               transactions: block_details[14].clone().try_into().unwrap_or(Err("Validator error!")?),
            };
 
            Ok(block)
@@ -160,31 +168,21 @@ impl Into<Vec<u8>> for &Block {
 
        let time_bytes: Vec<u8> = opis::Integer::from(&self.time).into();
 
-       let tx_bytes: Vec<Vec<u8>> = self.transactions.iter().map(|x| x.into()).collect();
-
        astro_format::encode(&[
-           &self.accounts_hash,
-           &self.block_hash,
+           &self.accounts,
+           &self.hash,
            &chain_bytes,
            &self.data,
            &delay_difficulty_bytes,
            &self.delay_output,
-           &self.details_hash,
+           &self.miner.0,
            &number_bytes,
-           &self.previous_block_hash,
-           &self.receipts_hash,
+           &self.previous_block,
+           &self.receipts,
            &self.signature,
            &solar_used_bytes,
            &time_bytes,
-           &astro_format::encode(
-               &(tx_bytes
-                   .iter()
-                   .map(|x| x.as_slice())
-                   .collect::<Vec<_>>()
-               )
-           ),
-           &self.transactions_hash,
-           &self.validator.0,
+           &self.transactions,
        ])
 
    }

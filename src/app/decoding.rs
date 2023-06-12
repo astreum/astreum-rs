@@ -106,7 +106,8 @@ impl App {
                                                                                 timestamp: SystemTime::now()
                                                                                     .duration_since(SystemTime::UNIX_EPOCH)
                                                                                     .unwrap()
-                                                                                    .as_secs()
+                                                                                    .as_secs(),
+                                                                                chain: todo!(),
                                                                             }
                                                                         );
 

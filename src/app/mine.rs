@@ -16,9 +16,13 @@ impl App {
 
             if Instant::now().duration_since(now).as_millis() > 1000 {
 
-               // check validator
+               // if current validator:
 
-               now = Instant::now()
+                  // create new block
+
+                  // broadcast block
+
+                  now = Instant::now()
 
             }
             

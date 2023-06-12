@@ -1,10 +1,24 @@
-use std::{error::Error, net::{IpAddr, UdpSocket, SocketAddr}, sync::{Arc, Mutex}, fs::File, io::{BufReader, BufRead}, collections::HashMap};
 
-use rand::Rng;
+use crate::app::{
+	block::Block,
+	object::Object,
+	route::Route,
+	ping::Ping,
+	message::Message,
+	topic::Topic,
+};
 
-use crate::app::{object::Object, route::Route, ping::Ping, message::Message, topic::Topic};
+use std::{
+	error::Error,
+	net::IpAddr,
+	sync::{Arc, Mutex},
+	fs::{File, self},
+	io::{BufReader, BufRead},
+	collections::HashMap,
+	path::Path
+};
 
-use super::App;
+use super::{App, chain::ChainID};
 
 
 
@@ -12,6 +26,7 @@ impl App {
 
 	pub fn new(
 		account_key: [u8;32],
+		chain_id: ChainID,
 		validator: bool
 	) -> Result<App, Box<dyn Error>> {
 
@@ -21,7 +36,9 @@ impl App {
 
 		let relay_address = fides::x25519::public_key(&relay_key);
 
-		let objects_store: neutrondb::Store<[u8;32],Object> = neutrondb::Store::new("/neutrondb/objects")?;
+		let object_store: neutrondb::Store<[u8;32],Object> = neutrondb::Store::new("/neutrondb/objects")?;
+
+		let object_store_pointer = Arc::new(Mutex::new(object_store));
 
 		let peer_route_pointer = Arc::new(Mutex::new(Route::new()));
 
@@ -49,9 +66,24 @@ impl App {
 
 		let gets_queue_pointer = Arc::new(Mutex::new(Vec::new()));
 
+		let latest_block_path = Path::new("/latest_block.bin");
+
+		let latest_block = if latest_block_path.is_file() {
+
+			let latest_block_bytes = fs::read(latest_block_path)?;
+			
+			Block::try_from(latest_block_bytes)?
+
+		} else {
+
+			Block::new(chain_id)
+			
+		};
+
 		let ping = Ping {
 			public_key: relay_address,
-			validator: validator,
+			validator,
+    		chain: latest_block.hash,
 		};
 
 		let ping_bytes: Vec<u8> = ping.into();
@@ -61,13 +93,11 @@ impl App {
 			topic: Topic::Ping,
 		};
 
-		// get latest block hash and get block from objects store 
-
 		let app = App {
 			validator,
 			account_address,
 			account_key,
-			object_store_pointer: Arc::new(Mutex::new(objects_store)),
+			object_store_pointer,
 			relay_address,
 			relay_key,
 			peer_route_pointer,
@@ -80,10 +110,10 @@ impl App {
     		storage_index: HashMap::new(),
 			peers_pointer: Arc::new(Mutex::new(HashMap::new())),
 			ping_message,
-			latest_block: todo!(),
+			latest_block,
 		};
 
-		todo!()
+		Ok(app)
 
 	}
 

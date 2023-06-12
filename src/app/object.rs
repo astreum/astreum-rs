@@ -1,9 +1,9 @@
-use std::{error::Error, sync::{Arc, Mutex}, time::Instant};
+use std::{error::Error, sync::{Arc, Mutex}};
 
 #[derive(Clone, Debug)]
 pub struct Object {
-	leaf: bool,
-	data: Vec<u8>
+	pub leaf: bool,
+	pub data: Vec<u8>
 }
 
 
