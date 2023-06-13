@@ -141,3 +141,37 @@ pub fn storage_search(
 
     Ok(None)
 }
+
+pub fn storage_list(
+    object_store: &neutrondb::Store<[u8; 32], Object>,
+    root_hash: [u8; 32],
+) -> Result<Vec<Object>, Box<dyn Error>> {
+    // Put root hash object into a vec
+    let mut object_vec = vec![object_store.get(&root_hash)?];
+
+    // Map the vec objects into the children until the first object in the vec is a leaf
+    while !object_vec[0].leaf {
+        let new_object_vec: Vec<_> = object_vec
+            .iter()
+            .flat_map(|x| {
+                if x.leaf {
+                    vec![x.clone()]
+                } else {
+                    let child_hashes = split_hash(&x.data);
+
+                    // Retrieve child objects from the store and collect them into a new vec
+                    let child_objects: Result<Vec<_>, _> = child_hashes
+                        .iter()
+                        .map(|hash| object_store.get(hash))
+                        .collect();
+
+                    child_objects.unwrap_or_default()
+                }
+            })
+            .collect();
+
+        object_vec = new_object_vec;
+    }
+
+    Ok(object_vec)
+}
