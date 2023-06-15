@@ -1,14 +1,12 @@
 use std::{collections::{BTreeMap, HashMap}, error::Error};
 
-use super::{address::Address, object::Object};
+use super::{address::Address, object::Object, storage::{storage_search, storage_list}};
 
 #[derive(Clone,Debug)]
 pub struct Account {
     pub balance: opis::Integer,
     pub counter: opis::Integer,
-    pub details_hash: [u8; 32],
-    pub storage: BTreeMap<Vec<u8>, Vec<u8>>,
-    pub storage_hash: [u8; 32],
+    pub storage: [u8; 32],
 }
 
 impl Account {
@@ -18,12 +16,53 @@ impl Account {
         Account {
             balance: opis::Integer::zero(),
             counter: opis::Integer::zero(),
-            storage: BTreeMap::new(),
-            storage_hash: [0_u8; 32],
-            details_hash: [0_u8; 32],
+            storage: [0_u8; 32],
         }
 
     }
+
+    // pub fn try_from_storage(
+    //     object_store: &neutrondb::Store<[u8; 32], Object>,
+    //     address: &[u8; 32],
+    //     accounts_hash: &[u8; 32],
+    // ) -> Result<Account, Box<dyn Error>> {
+
+    //     match storage_search(address, object_store, *accounts_hash)? {
+            
+    //         Some(account_details) => {
+
+    //             let account_objects = storage_list(
+    //                 object_store,
+    //                 account_details
+    //                     .data
+    //                     .as_slice()
+    //                     .try_into()
+    //                     .map_err(|_| "Invalid account data: Not a valid hash")?,
+    //             )?;
+
+    //             if account_objects.len() != 3 {
+    //                 return Err("Account field error!")?;
+    //             }
+        
+    //             let balance = opis::Integer::from(account_objects[0].data);
+        
+    //             let counter = opis::Integer::from(account_objects[1].data);
+        
+    //             let storage = account_objects[2].hash();
+        
+    //             Ok(Account {
+    //                 balance,
+    //                 counter,
+    //                 storage,
+    //             })
+
+    //         },
+
+    //         None => Err("Not Found!")?,
+
+    //     }
+        
+    // }
 
     pub fn from_accounts(
         address: &Address,
@@ -44,24 +83,8 @@ impl Account {
 
     pub fn storage_hash(&self) -> [u8; 32] {
 
-        let storage = self.storage
-            .iter()
-            .map(|x| [fides::hash::blake_3(x.0), fides::hash::blake_3(x.1)].concat())
-            .collect::<Vec<_>>();
-        
-        fides::merkle_tree::root(
-            fides::hash::blake_3,
-            &(storage
-                .iter()
-                .map(|x| x.as_slice())
-                .collect::<Vec<_>>()
-            )
-        )
+        todo!()
 
-    }
-
-    pub fn update_storage_hash(&mut self) {
-        self.storage_hash = self.storage_hash()
     }
 
     pub fn increase_balance(&mut self, amount: &opis::Integer) {
@@ -96,20 +119,10 @@ impl Account {
             &[
                 &balance,
                 &counter,
-                &self.storage_hash
+                &self.storage
             ]
         )
         
-    }
-
-    pub fn try_from_storage(
-        account_address: &[u8;32],
-        accounts_hash: &[u8;32],
-        object_store: &neutrondb::Store<[u8;32], Object>
-    ) -> Result<Account, Box<dyn Error>>{
-
-        todo!()
-
     }
 
 }
@@ -118,44 +131,21 @@ impl TryFrom<&[u8]> for Account {
 
     fn try_from(arg: &[u8]) -> Result<Self, Box<dyn Error>> {
 
-        let account_details = astro_format::decode(arg)?;
+        let account_fields = astro_format::decode(arg)?;
 
-        if account_details.len() == 3 {
-
-            let decoded_storage = astro_format::decode(account_details[2])?;
-
-            let mut storage = BTreeMap::new();
-
-            for i in decoded_storage {        
-
-                let decoded_kv = astro_format::decode(i)?;
-
-                if decoded_kv.len() == 2 {
-
-                    storage.insert(
-                        decoded_kv[0].try_into()?,
-                        decoded_kv[1].try_into()?
-                    );
-
-                }
-
-            }
+        if account_fields.len() == 3 {
 
             let mut result = Account {
-                balance: opis::Integer::from(account_details[0]),
-                counter: opis::Integer::from(account_details[1]),
-                details_hash: [0_u8; 32],
-                storage: storage,
-                storage_hash: [0_u8; 32]
+                balance: opis::Integer::from(account_fields[0]),
+                counter: opis::Integer::from(account_fields[1]),
+                storage: account_fields[2].try_into()?,
             };
-
-            result.update_storage_hash();
 
             Ok(result)
 
         } else {
 
-            Err("Internal error!")?
+            Err("Account fields error!")?
 
         }
 

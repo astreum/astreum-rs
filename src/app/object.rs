@@ -25,6 +25,10 @@ pub struct ObjectResponse{
 
 impl Object {
 
+	pub fn hash(&self) -> [u8;32] {
+		todo!()
+	}
+
 	pub fn from_astreum_storage(
 		key: &[u8;32],
 		astreum_storage_pointer: Arc<Mutex<neutrondb::Store<[u8;32], Object>>>,
