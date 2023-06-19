@@ -1,19 +1,31 @@
 use std::{error::Error, sync::{Arc, Mutex}};
-
+#[derive(PartialEq)]
 #[derive(Clone, Debug)]
 pub struct Object {
 	pub leaf: bool,
 	pub data: Vec<u8>
 }
-
-
 pub struct ObjectRequest {
 	hash: [u8;32],
 	kind: ObjectRequestKind,
  }
- 
- pub enum ObjectRequestKind { Get, Put }
 
+impl Into<Vec<u8>> for ObjectRequest {
+    fn into(self) -> Vec<u8> {
+        todo!()
+    }
+}
+ 
+pub enum ObjectRequestKind {
+	Get,
+	Put
+}
+
+impl Into<Vec<u8>> for ObjectRequestKind {
+    fn into(self) -> Vec<u8> {
+        todo!()
+    }
+}
 pub struct ObjectResponse{
 	data: Vec<u8>,
 	kind: ObjectResponseKind,
