@@ -1,6 +1,7 @@
-use std::{collections::{BTreeMap, HashMap}, error::Error};
-
-use super::{address::Address, object::Object};
+use std::collections::HashMap;
+use std::error::Error;
+use super::address::Address;
+use super::App;
 
 #[derive(Clone,Debug)]
 pub struct Account {
@@ -12,57 +13,12 @@ pub struct Account {
 impl Account {
 
     pub fn new() -> Account {
-
         Account {
             balance: opis::Integer::zero(),
             counter: opis::Integer::zero(),
             storage: [0_u8; 32],
         }
-
     }
-
-    // pub fn try_from_storage(
-    //     object_store: &neutrondb::Store<[u8; 32], Object>,
-    //     address: &[u8; 32],
-    //     accounts_hash: &[u8; 32],
-    // ) -> Result<Account, Box<dyn Error>> {
-
-    //     match storage_search(address, object_store, *accounts_hash)? {
-            
-    //         Some(account_details) => {
-
-    //             let account_objects = storage_list(
-    //                 object_store,
-    //                 account_details
-    //                     .data
-    //                     .as_slice()
-    //                     .try_into()
-    //                     .map_err(|_| "Invalid account data: Not a valid hash")?,
-    //             )?;
-
-    //             if account_objects.len() != 3 {
-    //                 return Err("Account field error!")?;
-    //             }
-        
-    //             let balance = opis::Integer::from(account_objects[0].data);
-        
-    //             let counter = opis::Integer::from(account_objects[1].data);
-        
-    //             let storage = account_objects[2].hash();
-        
-    //             Ok(Account {
-    //                 balance,
-    //                 counter,
-    //                 storage,
-    //             })
-
-    //         },
-
-    //         None => Err("Not Found!")?,
-
-    //     }
-        
-    // }
 
     pub fn from_accounts(
         address: &Address,
@@ -77,41 +33,24 @@ impl Account {
 
     }
 
-    pub fn increase_counter(&mut self) {
-        self.counter += opis::Integer::one()
-    }
-
     pub fn storage_hash(&self) -> [u8; 32] {
 
         todo!()
 
     }
 
-    pub fn increase_balance(&mut self, amount: &opis::Integer) {
-
-        self.balance += amount;
-
-    }
-
     pub fn decrease_balance(&mut self, amount:&opis::Integer) -> Result<(), Box<dyn Error>> {
-
         if &self.balance >= amount {
-
             self.balance -= amount;
-
             Ok(())
-
         } else {
-
             Err("Not enough balance!")?
-
         }
     }
 
     pub fn details_hash(&self) -> [u8; 32] {
 
         let balance: Vec<u8> = (&self.balance).into();
-
         let counter: Vec<u8> = (&self.counter).into();
 
         fides::merkle_tree::root(
@@ -123,6 +62,34 @@ impl Account {
             ]
         )
         
+    }
+
+}
+
+impl App {
+
+    pub fn get_account(&self, accounts: &[u8;32], address: Address) -> Result<Account, Box<dyn Error>> {
+
+        let detail_root_object = self.search_object(&address.0, accounts)?;
+
+        let detail_objects = self.get_list(&detail_root_object.hash())?;
+
+        if detail_objects.len() != 3 {
+            return Err("Account field error!")?;
+        }
+
+        let balance = opis::Integer::from(&detail_objects[0].data[..]);
+
+        let counter = opis::Integer::from(&detail_objects[1].data[..]);
+
+        let storage = detail_objects[2].hash();
+
+        Ok(Account {
+            balance,
+            counter,
+            storage,
+        })
+
     }
 
 }

@@ -22,7 +22,7 @@ pub mod peer;
 pub mod ping;
 pub mod receipt;
 pub mod route;
-pub mod storage;
+pub mod tree;
 pub mod sync;
 pub mod topic;
 pub mod transaction;
