@@ -71,9 +71,9 @@ impl Transaction {
 
                                        Ok(_) => {
 
-                                           recipient.increase_balance(&self.value);
+                                           recipient.balance += &self.value;
 
-                                           sender.increase_counter();
+                                           sender.counter += opis::Integer::one();
 
                                            changed_accounts.insert(self.sender, sender);
 
@@ -88,7 +88,7 @@ impl Transaction {
 
                                        Err(_) => {
 
-                                           sender.increase_counter();
+                                            sender.counter += opis::Integer::one();
 
                                            changed_accounts.insert(self.sender, sender);
 
@@ -119,7 +119,7 @@ impl Transaction {
 
                                                    let mut recipient = Account::new();
 
-                                                   recipient.increase_balance(&self.value);
+                                                   recipient.balance += &self.value;
 
                                                    changed_accounts.insert(self.sender, sender);
 
@@ -134,7 +134,7 @@ impl Transaction {
 
                                                Err(_) => {
 
-                                                   sender.increase_counter();
+                                                sender.counter += opis::Integer::one();
 
                                                    changed_accounts.insert(self.sender, sender);
 
@@ -151,7 +151,7 @@ impl Transaction {
 
                                        Err(_) => {
 
-                                           sender.increase_counter();
+                                        sender.counter += opis::Integer::one();
 
                                            changed_accounts.insert(self.sender, sender);
 

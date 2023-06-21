@@ -114,8 +114,6 @@ impl App {
     }
 
 	pub fn network_get_object(&self, object_hash: &[u8;32]) -> Result<Object, Box<dyn Error>> {
-		
-        let now = Instant::now();
 
         let nearest_peer = self.nearest_peer(object_hash)?;
 
@@ -131,7 +129,7 @@ impl App {
             topic: Topic::ObjectRequest
         };
 
-        let _c = self.send_message(nearest_peer, object_request_message)?;
+        let _c = self.send_message(nearest_peer, object_request_message.clone())?;
 
         for _ in 0..3 {
             for _ in 0..10 {

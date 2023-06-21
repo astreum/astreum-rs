@@ -1,6 +1,6 @@
 use std::error::Error;
 
-use super::{chain::ChainID, address::Address, object::Object};
+use super::{chain::ChainID, address::Address, object::Object, App};
 
 #[derive(Clone, Debug)]
 pub struct Block {
@@ -23,7 +23,6 @@ pub struct Block {
 impl Block {
 
     pub fn new(chain_id: ChainID) -> Block {
-
         Block {
             accounts: [0_u8; 32],
             hash: [0_u8; 32],
@@ -40,15 +39,11 @@ impl Block {
             transactions: [0_u8; 32],
             miner: Address([0_u8; 32])
         }
-
     }
 
     pub fn sign(&mut self, secret_key: &[u8; 32]) -> Result<(), Box<dyn Error>> {
-
         self.signature = fides::ed25519::sign(&self.details_hash(), secret_key)?;
-
         Ok(())
-
     }
 
     pub fn details_hash(&self) -> [u8; 32] {
@@ -85,24 +80,17 @@ impl Block {
     }
     
     pub fn update_hash(&mut self) {
-        
         self.hash = self.hash()
-    
     }
 
     pub fn hash(&self) -> [u8; 32] {
-
-        fides::merkle_tree::root(fides::hash::blake_3, &[&self.details_hash(), &self.signature])
-
-    }
-    
-    pub fn try_from_storage(
-        block_hash: &[u8;32],
-        object_store: &neutrondb::Store<[u8;32], Object>
-    ) -> Result<Block, Box<dyn Error>>{
-
-        todo!()
-
+        fides::merkle_tree::root(
+            fides::hash::blake_3,
+            &[
+                &self.details_hash(),
+                &self.signature
+            ]
+        )
     }
 
 }
@@ -193,4 +181,45 @@ impl Into<Vec<u8>> for Block {
    fn into(self) -> Vec<u8> {
        (&self).into()
    }
+}
+
+impl App {
+
+    pub fn get_block(&self, block_hash: &[u8;32]) -> Result<Block, Box<dyn Error>> {
+
+        let block_objects = self.object_children(block_hash)?;
+
+        let detail_objects = self.get_list(&block_objects[0].hash())?;
+
+        if detail_objects.len() != 12 {
+            return Err("Block field error!")?;
+        }
+
+        let chain_id = ChainID::try_from(&detail_objects[1].data[..])?;
+
+        let mut block = Block {
+            accounts: detail_objects[0].hash(),
+            chain_id,
+            data: detail_objects[2].data.clone(),
+            delay_difficulty: u64::from_be_bytes(
+                detail_objects[3].data[..].try_into()?
+            ),
+            delay_output: detail_objects[4].data.clone(),
+            hash: [0_u8;32],
+            miner: Address(detail_objects[5].data[..].try_into()?),
+            number: detail_objects[6].data[..].into(),
+            previous_block: detail_objects[7].data[..].try_into()?,
+            receipts: detail_objects[8].data[..].try_into()?,
+            signature: block_objects[1].data[..].try_into()?,
+            solar_used: u64::from_be_bytes(detail_objects[9].data[..].try_into()?),
+            time: u64::from_be_bytes(detail_objects[10].data[..].try_into()?),
+            transactions: detail_objects[11].data[..].try_into()?,
+        };
+
+        block.update_hash();
+
+        Ok(block)
+
+    }
+
 }

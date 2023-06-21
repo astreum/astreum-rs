@@ -123,7 +123,7 @@ impl App {
         }
 
         if children.len() == 2 {
-            Ok((children[0], children[1]))
+            Ok((children[0].clone(), children[1].clone()))
         } else {
             Err("Formatting error!")?
         }
@@ -132,7 +132,7 @@ impl App {
 
     pub fn middle_key_value(&self, root_hash: &[u8; 32]) -> Result<(Object, Object), Box<dyn Error>> {
 
-        let mut children = self.object_children(root_hash)?;
+        let children = self.object_children(root_hash)?;
 
         if children.len() == 2 {
             if !children[0].leaf {
