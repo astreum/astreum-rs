@@ -1,6 +1,8 @@
 use std::error::Error;
 
-use super::{chain::ChainID, address::Address, object::Object, App};
+use crate::storage::Storage;
+
+use super::{chain::ChainID, address::Address};
 
 #[derive(Clone, Debug)]
 pub struct Block {
@@ -96,15 +98,10 @@ impl Block {
 }
 
 impl TryFrom<&[u8]> for Block {
-
    type Error = Box<dyn Error>;
-
    fn try_from(value: &[u8]) -> Result<Self, Box<dyn Error>> {
-       
        let block_details = astro_format::decode(value)?;
-
        if block_details.len() == 16 {
-
            let block = Block {
                accounts: block_details[0].try_into().unwrap_or(Err("Accounts hash error!")?),
                hash: [0_u8;32],
@@ -121,41 +118,27 @@ impl TryFrom<&[u8]> for Block {
                time: u64::from_be_bytes(block_details[12].try_into().unwrap_or(Err("Block time error!")?)),
                transactions: block_details[14].clone().try_into().unwrap_or(Err("Validator error!")?),
            };
-
            Ok(block)
-
        } else {
-
            Err("Block details error!")?
-
        }
-
    }
-   
 }
 
 impl TryFrom<Vec<u8>> for Block {
-   type Error = Box<dyn Error>;
-
-   fn try_from(value: Vec<u8>) -> Result<Self, Box<dyn Error>> {
-       Block::try_from(&value[..])
-   }
+    type Error = Box<dyn Error>;
+    fn try_from(value: Vec<u8>) -> Result<Self, Box<dyn Error>> {
+        Block::try_from(&value[..])
+    }
 }
 
 impl Into<Vec<u8>> for &Block {
-
    fn into(self) -> Vec<u8> {
-
        let chain_bytes: Vec<u8> = (&self.chain_id).into();
-
        let delay_difficulty_bytes: Vec<u8> = opis::Integer::from(&self.delay_difficulty).into();
-
        let number_bytes: Vec<u8> = (&self.number).into();
-
        let solar_used_bytes: Vec<u8> = opis::Integer::from(&self.solar_used).into();
-
        let time_bytes: Vec<u8> = opis::Integer::from(&self.time).into();
-
        astro_format::encode(&[
            &self.accounts,
            &self.hash,
@@ -172,9 +155,7 @@ impl Into<Vec<u8>> for &Block {
            &time_bytes,
            &self.transactions,
        ])
-
    }
-
 }
 
 impl Into<Vec<u8>> for Block {
@@ -183,20 +164,15 @@ impl Into<Vec<u8>> for Block {
    }
 }
 
-impl App {
+impl Storage {
 
     pub fn get_block(&self, block_hash: &[u8;32]) -> Result<Block, Box<dyn Error>> {
-
         let block_objects = self.object_children(block_hash)?;
-
         let detail_objects = self.get_list(&block_objects[0].hash())?;
-
         if detail_objects.len() != 12 {
             return Err("Block field error!")?;
         }
-
         let chain_id = ChainID::try_from(&detail_objects[1].data[..])?;
-
         let mut block = Block {
             accounts: detail_objects[0].hash(),
             chain_id,
@@ -215,11 +191,7 @@ impl App {
             time: u64::from_be_bytes(detail_objects[10].data[..].try_into()?),
             transactions: detail_objects[11].data[..].try_into()?,
         };
-
         block.update_hash();
-
         Ok(block)
-
     }
-
 }

@@ -3,7 +3,7 @@ use std::{error::Error, thread, time::{Instant, SystemTime}};
 use super::App;
 
 
-impl App {
+impl Relay {
 
     pub fn liveness(&self) -> Result<(), Box<dyn Error>> {
 

@@ -1,9 +1,9 @@
 use std::{error::Error, net::UdpSocket, thread};
 
-use super::App;
+use super::Relay;
 
 
-impl App {
+impl Relay {
 
     pub fn incoming(&self) -> Result<(), Box<dyn Error>> {
 

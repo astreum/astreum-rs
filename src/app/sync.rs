@@ -6,13 +6,13 @@ impl App {
 
    pub fn sync(&self) -> Result<(), Box<dyn Error>> {
 
-      self.incoming()?;
+      // self.incoming()?;
 
-      self.decoding()?;
+      // self.decoding()?;
 
-      self.outgoing()?;
+      // self.outgoing()?;
 
-      self.liveness()?;
+      // self.liveness()?;
 
       thread::spawn(move || {
 

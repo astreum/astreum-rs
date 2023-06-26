@@ -1,49 +1,27 @@
-use std::{sync::{Arc, Mutex}, net::{IpAddr, UdpSocket}, collections::HashMap};
+use crate::relay::Relay;
+use crate::storage::Storage;
+use std::collections::HashMap;
+use std::sync::Arc;
+use std::sync::Mutex;
 
-use self::{object::Object, chain::Chain, route::Route, peer::Peer, message::Message, block::Block};
-
+use self::block::Block;
+use self::transaction::Transaction;
 pub mod account;
 pub mod address;
 pub mod application;
 pub mod block;
-pub mod bucket;
 pub mod chain;
-pub mod decoding;
-pub mod envelope;
-pub mod incoming;
-pub mod liveness;
-pub mod message;
 pub mod mine;
 pub mod miner;
 pub mod new;
-pub mod object;
-pub mod outgoing;
-pub mod peer;
-pub mod ping;
 pub mod receipt;
-pub mod route;
-pub mod tree;
 pub mod sync;
-pub mod topic;
 pub mod transaction;
 // pub mod validate;
 
 pub struct App {
-   validator: bool,
-   account_address: [u8;32],
-   account_key: [u8;32],
-   object_store_pointer: Arc<Mutex<neutrondb::Store<[u8;32], Object>>>,
-   latest_block: Block,
-   relay_address: [u8;32],
-   relay_key: [u8;32],
-   peer_route_pointer: Arc<Mutex<Route>>,
-   consensus_route_pointer: Arc<Mutex<Route>>,
-   incoming_queue_pointer: Arc<Mutex<Vec<(IpAddr,Vec<u8>)>>>,
-   outgoing_queue_pointer: Arc<Mutex<Vec<(IpAddr, Message)>>>,
-   seeders: Vec<IpAddr>,
-   puts_queue_pointer: Arc<Mutex<Vec<[u8;32]>>>,
-   gets_queue_pointer: Arc<Mutex<Vec<[u8;32]>>>,
-   storage_index: HashMap<[u8;32],Vec<IpAddr>>,
-   peers_pointer: Arc<Mutex<HashMap<IpAddr, Peer>>>,
-   ping_message: Message
+   latest_block_pointer: Arc<Mutex<Block>>,
+   pending_transactions_pointer: Arc<Mutex<HashMap<[u8;32],Transaction>>>,
+   relay_pointer: Arc<Mutex<Relay>>,
+   storage_pointer: Arc<Mutex<Storage>>,
 }

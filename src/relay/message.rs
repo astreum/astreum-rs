@@ -1,4 +1,6 @@
-use super::topic::{Topic};
+use std::{net::IpAddr, error::Error};
+
+use super::{topic::{Topic}, Relay};
 
 #[derive(Clone, Debug)]
 pub struct Message {
@@ -52,4 +54,18 @@ impl TryFrom<&[u8]> for Message {
 
         }
     }
+}
+
+impl Relay {
+
+    pub fn send_message(&self, ip_addr: IpAddr, message: Message) -> Result<(), Box<dyn Error>> {
+        match self.outgoing_queue_pointer.lock() {
+            Ok(mut outgoing_queue) => {
+                outgoing_queue.push((ip_addr, message));
+                Ok(())
+            },
+            Err(_) => Err("object_store lock error!")?,
+        }
+    }
+
 }

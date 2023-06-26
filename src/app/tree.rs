@@ -88,16 +88,6 @@ fn split_hash(data: &[u8]) -> Vec<[u8; 32]> {
 
 impl App {
 
-    pub fn send_message(&self, ip_addr: IpAddr, message: Message) -> Result<(), Box<dyn Error>> {
-        match self.outgoing_queue_pointer.lock() {
-            Ok(mut outgoing_queue) => {
-                outgoing_queue.push((ip_addr, message));
-                Ok(())
-            },
-            Err(_) => Err("object_store lock error!")?,
-        }
-    }
-
     pub fn nearest_peer(&self, hash: &[u8;32]) -> Result<IpAddr, Box<dyn Error>> {
 
         todo!()
@@ -113,37 +103,5 @@ impl App {
     pub fn network_put(&self, object: Object) -> Result<(), Box<dyn Error>> {
         todo!()
     }
-
-    pub fn first_key_value(&self, root_hash: &[u8; 32]) -> Result<(Object, Object), Box<dyn Error>> {
-
-        let mut children = self.object_children(root_hash)?;
-
-        while !children[0].leaf {
-            children = self.object_children(&children[0].hash())?
-        }
-
-        if children.len() == 2 {
-            Ok((children[0].clone(), children[1].clone()))
-        } else {
-            Err("Formatting error!")?
-        }
-
-    }
-
-    pub fn middle_key_value(&self, root_hash: &[u8; 32]) -> Result<(Object, Object), Box<dyn Error>> {
-
-        let children = self.object_children(root_hash)?;
-
-        if children.len() == 2 {
-            if !children[0].leaf {
-                self.first_key_value(&children[1].hash())
-            } else {
-                Ok((children[0].clone(), children[1].clone()))
-            }
-        } else {
-            Err("Formatting error!")?
-        }
-        
-    }    
 
 }

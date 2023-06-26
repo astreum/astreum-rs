@@ -1,6 +1,6 @@
 use std::error::Error;
 
-use super::App;
+use crate::storage::Storage;
 
 #[derive(Clone, Debug)]
 pub struct Receipt {
@@ -66,7 +66,7 @@ impl TryFrom<&[u8]> for Status {
 	}
 }
 
-impl App {
+impl Storage {
 
 pub fn get_receipt(&self, receipt_hash: &[u8;32]) -> Result<Receipt, Box<dyn Error>> {
 

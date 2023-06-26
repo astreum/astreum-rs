@@ -1,6 +1,7 @@
 use std::error::Error;
+use crate::storage::Storage;
+
 use super::address::Address;
-use super::App;
 use super::chain::ChainID;
 
 #[derive(Clone, Debug)]
@@ -106,7 +107,7 @@ impl Transaction {
 
 // }
 
-impl App {
+impl Storage {
 
     pub fn get_transaction(&self, transaction_hash: &[u8;32]) -> Result<Transaction, Box<dyn Error>> {
 

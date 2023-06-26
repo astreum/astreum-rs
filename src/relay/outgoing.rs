@@ -2,10 +2,10 @@ use std::{thread, error::Error, net::{UdpSocket, SocketAddr}};
 
 use rand::Rng;
 
-use super::{App, envelope::Envelope};
+use super::{Relay, envelope::Envelope};
 
 
-impl App {
+impl Relay {
 
     pub fn outgoing(&self) -> Result<(), Box<dyn Error>> {
 

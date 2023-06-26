@@ -1,8 +1,8 @@
 use std::{error::Error, thread, net::{IpAddr, SocketAddr}, str::FromStr, time::SystemTime};
 
-use super::{App, envelope::Envelope, topic::Topic, route::RouteID, message::Message, ping::Ping, peer::Peer};
+use super::{topic::Topic, message::Message, ping::Ping, peer::Peer, Relay, envelope::Envelope, route::RouteID};
 
-impl App {
+impl Relay {
 
     pub fn decoding(&self) -> Result<(), Box<dyn Error>> {
 

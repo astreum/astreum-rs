@@ -18,7 +18,7 @@ impl Relay {
 
 				let mut closest_distance_option = None;
 
-				for (ip_addr, peer) in peers.into_iter() {
+				for (ip_addr, peer) in peers.iter() {
 
 					let b = opis::Integer::from(&peer.public_key[..]);
 
@@ -56,7 +56,7 @@ impl Relay {
 	}
 
 	pub fn network_nearest(&self) -> Option<IpAddr> {
-
+		todo!()
 	}
 	
 }

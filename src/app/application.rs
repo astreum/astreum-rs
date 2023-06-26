@@ -9,182 +9,105 @@ impl Transaction {
    pub fn application(
 
        &self,
-       accounts_store: &neutrondb::Store<Address, Account>,
-       changed_accounts: &mut HashMap<Address, Account>
+       changed_accounts: &mut HashMap<Address, Account>,
+       mut recipient: Account,
+       mut sender: Account
        
    ) -> Result<Receipt, Box<dyn Error>> {
 
-       match Account::from_accounts(&self.sender, &changed_accounts, accounts_store) {
+        if sender.counter == self.counter {
 
-           Ok(mut sender) => {
+            let mut solar_used = 0;
 
-               if sender.counter == self.counter {
+            let transaction_cost = opis::Integer::from_dec("1000")?;
 
-                   let mut solar_used = 0;
+            sender.decrease_balance(&transaction_cost)?;
 
-                   let transaction_cost = opis::Integer::from_dec("1000")?;
+            solar_used += 1000;
 
-                   sender.decrease_balance(&transaction_cost)?;
+            if self.sender != self.recipient {
 
-                   solar_used += 1000;
+                if self.recipient == CONSENSUS_ADDRESS {
+                    
+                    if self.value != opis::Integer::zero() {
+                        
+                        sender.decrease_balance(&self.value)?;
 
-                   if self.sender != self.recipient {
+                        // match Account::from_accounts(&self.sender, &changed_accounts, &accounts_store) {
 
-                       if self.recipient == CONSENSUS_ADDRESS {
-                           
-                           if self.value != opis::Integer::zero() {
-                               
-                               sender.decrease_balance(&self.value)?;
+                        //     Ok(_consensus) => {
 
-                               match Account::from_accounts(&self.sender, &changed_accounts, &accounts_store) {
+                        //         // add stake
 
-                                   Ok(_consensus) => {
+                        //         Err("")?
 
-                                       // add stake
+                        //     }
 
-                                       Err("")?
+                        //     Err(_) => Err("")?,
 
-                                   }
+                        // }
 
-                                   Err(_) => Err("")?,
+                        Err("")?
 
-                               }
+                    } else {
 
-                           } else {
+                        // decrease stake by amount in tx data
 
-                               // decrease stake by amount in tx data
+                        // add value to user account
 
-                               // add value to user account
+                        Err("")?
 
-                               Err("")?
+                    }
 
-                           }
 
+                } else {
 
-                       } else {
+                    if recipient.balance == opis::Integer::zero() && recipient.counter == opis::Integer::zero() {
+                        // charge account creation 
+                    }
 
-                           match Account::from_accounts(&self.recipient, &changed_accounts, &accounts_store) {
+                    match sender.decrease_balance(&self.value) {
 
-                               Ok(mut recipient) => {
+                        Ok(_) => {
 
-                                   match sender.decrease_balance(&self.value) {
+                            
 
-                                       Ok(_) => {
+                            recipient.balance += &self.value;
 
-                                           recipient.balance += &self.value;
+                            sender.counter += opis::Integer::one();
 
-                                           sender.counter += opis::Integer::one();
+                            changed_accounts.insert(self.sender, sender);
 
-                                           changed_accounts.insert(self.sender, sender);
+                            changed_accounts.insert(self.recipient, recipient);
 
-                                           changed_accounts.insert(self.recipient, recipient);
+                            Ok(Receipt {
+                                solar_used,
+                                status: Status::Accepted
+                            })
 
-                                           Ok(Receipt {
-                                               solar_used,
-                                               status: Status::Accepted
-                                           })
+                        },
 
-                                       },
+                        Err(_) => {
 
-                                       Err(_) => {
+                            sender.counter += opis::Integer::one();
 
-                                            sender.counter += opis::Integer::one();
+                            changed_accounts.insert(self.sender, sender);
 
-                                           changed_accounts.insert(self.sender, sender);
+                            Ok(Receipt {
+                                solar_used,
+                                status: Status::BalanceError
+                            })
 
-                                           Ok(Receipt {
-                                               solar_used,
-                                               status: Status::BalanceError
-                                           })
+                        },
 
-                                       },
+                    }
 
-                                   }
-
-                               },
-
-                               Err(_) => {
-
-                                   let account_cost = opis::Integer::from_dec("1000000")?;
-
-                                   match sender.decrease_balance(&account_cost) {
-
-                                       Ok(_) => {
-
-                                           solar_used += 1000000;
-
-                                           match sender.decrease_balance(&self.value) {
-
-                                               Ok(_) => {
-
-                                                   let mut recipient = Account::new();
-
-                                                   recipient.balance += &self.value;
-
-                                                   changed_accounts.insert(self.sender, sender);
-
-                                                   changed_accounts.insert(self.recipient, recipient);
-
-                                                   Ok(Receipt {
-                                                       solar_used,
-                                                       status: Status::Accepted
-                                                   })
-
-                                               },
-
-                                               Err(_) => {
-
-                                                sender.counter += opis::Integer::one();
-
-                                                   changed_accounts.insert(self.sender, sender);
-
-                                                   Ok(Receipt {
-                                                       solar_used,
-                                                       status: Status::BalanceError
-                                                   })
-
-                                               },
-
-                                           }
-
-                                       },
-
-                                       Err(_) => {
-
-                                        sender.counter += opis::Integer::one();
-
-                                           changed_accounts.insert(self.sender, sender);
-
-                                           Ok(Receipt {
-                                               solar_used,
-                                               status: Status::BalanceError
-                                           })
-
-                                       },
-
-                                   }
-
-                               }
-                           }
-                       }
-
-                   } else {
-
-                       Err("Internal error!")?
-
-                   }
-
-               } else {
-
-                   Err("Internal error!")?
-               }
-
-           },
-
-           Err(_) => Err("Internal error!")?
-
-       }
-
+                }
+            } else {
+                Err("")?
+            }
+        } else {
+            Err("")?
+        }
    }
-   
 }

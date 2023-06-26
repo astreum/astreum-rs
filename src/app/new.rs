@@ -1,19 +1,12 @@
 
-use crate::app::{
+use crate::{app::{
 	block::Block,
-	object::Object,
-	route::Route,
-	ping::Ping,
-	message::Message,
-	topic::Topic,
-};
+}, relay::Relay, storage::{object::Object, Storage}};
 
 use std::{
 	error::Error,
-	net::IpAddr,
 	sync::{Arc, Mutex},
-	fs::{File, self},
-	io::{BufReader, BufRead},
+	fs,
 	collections::HashMap,
 	path::Path
 };
@@ -30,42 +23,6 @@ impl App {
 		validator: bool
 	) -> Result<App, Box<dyn Error>> {
 
-		let account_address = fides::ed25519::public_key(&account_key)?;
-
-		let relay_key = fides::x25519::secret_key();
-
-		let relay_address = fides::x25519::public_key(&relay_key);
-
-		let object_store: neutrondb::Store<[u8;32],Object> = neutrondb::Store::new("/neutrondb/objects")?;
-
-		let object_store_pointer = Arc::new(Mutex::new(object_store));
-
-		let peer_route_pointer = Arc::new(Mutex::new(Route::new()));
-
-		let consensus_route_pointer = Arc::new(Mutex::new(Route::new()));
-
-		let incoming_queue_pointer = Arc::new(Mutex::new(Vec::new()));
-
-		let outgoing_queue_pointer = Arc::new(Mutex::new(Vec::new()));
-
-		let seeders_file = File::open("./seeders.txt")?;
-
-		let mut seeders = Vec::new();
-	
-		for seeder in BufReader::new(seeders_file).lines() {
-
-			let seeder = seeder?;
-			
-			let seeder_ip_addr: IpAddr = seeder.parse()?;
-
-			seeders.push(seeder_ip_addr)
-
-		}
-
-		let puts_queue_pointer = Arc::new(Mutex::new(Vec::new()));
-
-		let gets_queue_pointer = Arc::new(Mutex::new(Vec::new()));
-
 		let latest_block_path = Path::new("/latest_block.bin");
 
 		let latest_block = if latest_block_path.is_file() {
@@ -80,37 +37,24 @@ impl App {
 			
 		};
 
-		let ping = Ping {
-			public_key: relay_address,
-			validator,
-    		chain: latest_block.hash,
-		};
+		let object_store: neutrondb::Store<[u8;32],Object> = neutrondb::Store::new("/neutrondb/objects")?;
 
-		let ping_bytes: Vec<u8> = ping.into();
+		let object_store_pointer = Arc::new(Mutex::new(object_store));
 
-		let ping_message = Message {
-			body: ping_bytes,
-			topic: Topic::Ping,
+		let relay = Relay::new(latest_block.hash(), object_store_pointer.clone(), validator)?;
+
+		let relay_pointer = Arc::new(Mutex::new(relay));
+
+		let storage = Storage {
+			object_store_pointer,
+			relay_pointer: relay_pointer.clone()
 		};
 
 		let app = App {
-			validator,
-			account_address,
-			account_key,
-			object_store_pointer,
-			relay_address,
-			relay_key,
-			peer_route_pointer,
-			consensus_route_pointer,
-			incoming_queue_pointer,
-			outgoing_queue_pointer,
-			seeders,
-			puts_queue_pointer,
-			gets_queue_pointer,
-    		storage_index: HashMap::new(),
-			peers_pointer: Arc::new(Mutex::new(HashMap::new())),
-			ping_message,
-			latest_block,
+			latest_block_pointer: Arc::new(Mutex::new(latest_block)),
+			pending_transactions_pointer: Arc::new(Mutex::new(HashMap::new())),
+			relay_pointer,
+			storage_pointer: Arc::new(Mutex::new(storage)),
 		};
 
 		Ok(app)
