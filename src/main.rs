@@ -84,9 +84,12 @@ fn help() {
 Help
 - - - + - - - + - - -
 
-new                             creates a new account
-sync [chain id]                 sync the blockchain
-mine [chain id] [address]       start mining blocks
+new ................................................... creates a new account
+sync [chain] .......................................... validates the blockchain
+mine [chain] [address] ................................ extends the blockchain
+stake [chain] [address] [value] ....................... adds stake
+withdraw [chain] [address] [value] .................... removes stake
+send [value] on [chain] from [address] to [address] ... send solar
 
     "###);
 

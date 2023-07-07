@@ -43,8 +43,15 @@ Steps:
 
 CLI Commands:
 
-- help: Lists commands and descriptions
-- new: creates a new account
+```
+help .................................................. lists commands
+new ................................................... creates a new account
+sync [chain] .......................................... validates the blockchain
+mine [chain] [address] ................................ extends the blockchain
+stake [chain] [address] [value] ....................... adds stake
+withdraw [chain] [address] [value] .................... removes stake
+send [value] on [chain] from [address] to [address] ... send solar
+```
 
 ## License
 
@@ -73,5 +80,4 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 Roy R. O. Okello
-
-12023-06-21
+12023-07-07
