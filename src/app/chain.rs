@@ -1,14 +1,42 @@
 use std::{fmt, error::Error, collections::BTreeMap};
 
-use super::{address::Address, block::Block};
+use crate::storage::Storage;
 
+use super::{address::Address, block::Block, App};
+
+#[derive(Clone, Debug)]
+pub struct BlockError {}
+
+#[derive(Clone, Debug)]
 pub struct Chain {
-    pub accounts: BTreeMap<Address,[u8;32]>,
+    pub block_error: Option<BlockError>,
+    pub first_block_hash: [u8;32],
     pub latest_block: Block,
-    pub error_block: [u8;32], // where valid chain and this differ?
-    pub previous_blocks: Vec<[u8;32]>
 }
 
+impl Chain {
+    pub fn new(block: Block) -> Chain {
+        Chain {
+            block_error: None,
+            first_block_hash: block.previous_block,
+            latest_block: block
+        }
+    }
+}
+
+impl Storage {
+    pub fn is_part(&self, block_hash: &[u8;32], chain: &Chain) -> Result<bool, Box<dyn Error>> {
+        let mut previous_block = chain.latest_block.previous_block;
+        while previous_block != [0_u8;32] {
+            if &previous_block == block_hash {
+                return Ok(true)
+            } else {
+                previous_block = self.get_index(1, &previous_block)?.hash()
+            }
+        }
+        Ok(false)
+    }
+}
 #[derive(Clone)]
 pub enum ChainID {
     Main,

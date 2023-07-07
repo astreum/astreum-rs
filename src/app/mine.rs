@@ -8,17 +8,13 @@ impl App {
       todo!()
    }
 
-   pub fn mine(&self, mining_key: &[u8;32]) -> Result<(), Box<dyn Error>> {
+   pub fn mine(&self, account_key: &[u8;32]) -> Result<(), Box<dyn Error>> {
 
-      let mining_address = Address(fides::ed25519::public_key(mining_key)?);
+      let mining_address = Address(fides::ed25519::public_key(account_key)?);
 
       let pending_transactions_pointer = self.pending_transactions_pointer.clone();
 
       let latest_block_pointer = self.latest_block_pointer.clone();
-
-      self.sync()?;
-
-      
 
       thread::spawn(move || {
 

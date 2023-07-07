@@ -3,12 +3,13 @@ use std::{sync::{Mutex, Arc}, error::Error};
 use crate::relay::Relay;
 
 use self::object::Object;
+mod index;
 mod list;
 mod search;
 pub mod object;
 pub struct Storage {
-    object_store_pointer: Arc<Mutex<neutrondb::Store<[u8;32], Object>>>,
-    relay_pointer: Arc<Mutex<Relay>>
+    pub object_store_pointer: Arc<Mutex<neutrondb::Store<[u8;32], Object>>>,
+    pub relay_pointer: Arc<Mutex<Relay>>
 }
 
 impl Storage {
@@ -97,5 +98,4 @@ impl Storage {
         }
     }
 
-    
 }

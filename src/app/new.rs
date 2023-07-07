@@ -18,7 +18,6 @@ use super::{App, chain::ChainID};
 impl App {
 
 	pub fn new(
-		account_key: [u8;32],
 		chain_id: ChainID,
 		validator: bool
 	) -> Result<App, Box<dyn Error>> {
@@ -42,6 +41,8 @@ impl App {
 		let object_store_pointer = Arc::new(Mutex::new(object_store));
 
 		let relay = Relay::new(latest_block.hash(), object_store_pointer.clone(), validator)?;
+
+		relay.start()?;
 
 		let relay_pointer = Arc::new(Mutex::new(relay));
 

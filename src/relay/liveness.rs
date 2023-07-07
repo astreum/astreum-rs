@@ -1,7 +1,6 @@
 use std::{error::Error, thread, time::{Instant, SystemTime}};
 
-use super::App;
-
+use super::Relay;
 
 impl Relay {
 

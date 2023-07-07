@@ -7,7 +7,7 @@ pub struct LocalGetResult {
     missing: Vec<[u8;32]>
 }
 
-pub fn storage_index(
+pub fn get_index(
     index: usize,
     object_store: &neutrondb::Store<[u8; 32], Object>,
     root_hash: [u8; 32],

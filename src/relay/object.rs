@@ -1,7 +1,7 @@
 
 pub struct ObjectRequest {
-	hash: [u8;32],
-	kind: ObjectRequestKind,
+	pub hash: [u8;32],
+	pub kind: ObjectRequestKind,
  }
 
 impl Into<Vec<u8>> for ObjectRequest {
