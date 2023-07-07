@@ -23,8 +23,8 @@ Official Astreum Node written in Rust.
 
 - Create & View Accounts
 - Create Transactions
-- Sync Blockchain
-- Validate Blockchain
+- Sync & Validate the Blockchain
+- Mine Blocks
 - Stake & Withdraw Solar from Consensus Account
 
 ## Usage
@@ -80,4 +80,5 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 Roy R. O. Okello
+
 12023-07-07

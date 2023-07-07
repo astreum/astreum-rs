@@ -46,7 +46,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                 } else {
                     Err("Use sync [chain id]")?
                 }
-            }
+            },
 
             "mine" => {
                 println!("Mining ...");
@@ -62,7 +62,19 @@ fn main() -> Result<(), Box<dyn Error>> {
                 } else {
                     Err("Use mine [chain id] [address]")?
                 }
-            }
+            },
+
+            "send" => {
+
+            },
+
+            "stake" => {
+
+            },
+
+            "withdraw" => {
+
+            },
 
             _ => help()
 
