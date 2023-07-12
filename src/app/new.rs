@@ -56,6 +56,7 @@ impl App {
 			pending_transactions_pointer: Arc::new(Mutex::new(HashMap::new())),
 			relay_pointer,
 			storage_pointer: Arc::new(Mutex::new(storage)),
+			chains_pointer: Arc::new(Mutex::new(HashMap::new())),
 		};
 
 		Ok(app)

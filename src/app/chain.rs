@@ -2,15 +2,12 @@ use std::{fmt, error::Error, collections::BTreeMap};
 
 use crate::storage::Storage;
 
-use super::{address::Address, block::Block, App};
-
-#[derive(Clone, Debug)]
-pub struct BlockError {}
+use super::{address::Address, block::{Block, BlockError}, App};
 
 #[derive(Clone, Debug)]
 pub struct Chain {
     pub block_error: Option<BlockError>,
-    pub first_block_hash: [u8;32],
+    pub first_block: Block,
     pub latest_block: Block,
 }
 
@@ -18,7 +15,7 @@ impl Chain {
     pub fn new(block: Block) -> Chain {
         Chain {
             block_error: None,
-            first_block_hash: block.previous_block,
+            first_block: block.clone(),
             latest_block: block
         }
     }

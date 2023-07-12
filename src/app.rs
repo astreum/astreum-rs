@@ -5,6 +5,7 @@ use std::sync::Arc;
 use std::sync::Mutex;
 
 use self::block::Block;
+use self::chain::Chain;
 use self::transaction::Transaction;
 pub mod account;
 pub mod address;
@@ -17,9 +18,10 @@ pub mod new;
 pub mod receipt;
 pub mod sync;
 pub mod transaction;
-// pub mod validate;
+pub mod validate;
 
 pub struct App {
+   chains_pointer: Arc<Mutex<HashMap<[u8;32], Chain>>>,
    latest_block_pointer: Arc<Mutex<Block>>,
    pending_transactions_pointer: Arc<Mutex<HashMap<[u8;32],Transaction>>>,
    relay_pointer: Arc<Mutex<Relay>>,

@@ -22,6 +22,21 @@ pub struct Block {
    pub transactions: [u8; 32],
 }
 
+#[derive(Clone, Debug)]
+pub enum BlockErrorKind {
+    Delay,
+    Time,
+    Miner,
+    Number,
+    Transaction
+}
+
+#[derive(Clone, Debug)]
+pub struct BlockError {
+    data: Vec<u8>,
+    kind: BlockErrorKind
+}
+
 impl Block {
 
     pub fn new(chain_id: ChainID) -> Block {

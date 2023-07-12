@@ -41,7 +41,8 @@ fn main() -> Result<(), Box<dyn Error>> {
                 if args.len() == 3 {
                     let chain_id = ChainID::try_from(&args[2][..])?;
                     let app = App::new(chain_id, false)?;
-                    let _ = app.sync()?;
+                    app.sync()?;
+                    app.validate()?;
                     loop {}
                 } else {
                     Err("Use sync [chain id]")?
@@ -56,8 +57,9 @@ fn main() -> Result<(), Box<dyn Error>> {
                     let account_key: [u8;32] = fs::read(account_key_path)?[..].try_into()?;
                     let chain_id = ChainID::try_from(&args[2][..])?;
                     let app = App::new(chain_id, true)?;
-                    let _ = app.sync()?;
-                    let _ = app.mine(&account_key)?;
+                    app.sync()?;
+                    app.validate()?;
+                    app.mine(&account_key)?;
                     loop {}
                 } else {
                     Err("Use mine [chain id] [address]")?
@@ -65,15 +67,16 @@ fn main() -> Result<(), Box<dyn Error>> {
             },
 
             "send" => {
+                println!("Sending Solar ...");
 
             },
 
             "stake" => {
-
+                println!("Staking ...");
             },
 
             "withdraw" => {
-
+                println!("Withdraw ...");
             },
 
             _ => help()
