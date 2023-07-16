@@ -13,7 +13,6 @@ pub mod application;
 pub mod block;
 pub mod chain;
 pub mod mine;
-pub mod miner;
 pub mod new;
 pub mod receipt;
 pub mod sync;

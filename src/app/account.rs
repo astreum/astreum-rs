@@ -63,7 +63,7 @@ impl Account {
 
 impl Storage {
 
-    pub fn get_account(&self, accounts: &[u8;32], address: Address) -> Result<Account, Box<dyn Error>> {
+    pub fn get_account(&self, accounts: &[u8;32], address: &Address) -> Result<Account, Box<dyn Error>> {
         let detail_root_object = self.search_object(&address.0, accounts)?;
         let detail_objects = self.get_list(&detail_root_object.hash())?;
         if detail_objects.len() != 3 {

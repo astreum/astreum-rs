@@ -7,6 +7,8 @@ mod index;
 mod list;
 mod search;
 pub mod object;
+mod miner;
+mod pairs;
 pub struct Storage {
     pub object_store_pointer: Arc<Mutex<neutrondb::Store<[u8;32], Object>>>,
     pub relay_pointer: Arc<Mutex<Relay>>
