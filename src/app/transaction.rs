@@ -9,6 +9,8 @@ pub struct Transaction {
 	pub chain_id: ChainID,
 	pub counter: opis::Integer,
 	pub data: Vec<u8>,
+	pub details_hash: [u8;32],
+	pub hash: [u8;32],
 	pub recipient: Address,
 	pub sender: Address,
 	pub signature: [u8;64],
@@ -17,20 +19,18 @@ pub struct Transaction {
 
 impl Transaction {
 
-	pub fn sign(&mut self, secret_key: &[u8; 32]) -> Result<(), Box<dyn Error>> {
-		self.signature = fides::ed25519::sign(&self.details_hash(), secret_key)?;
+	pub fn signature(&mut self, secret_key: &[u8; 32]) -> Result<(), Box<dyn Error>> {
+		self.signature = fides::ed25519::sign(&self.details_hash, secret_key)?;
 		Ok(())
 	}
 
-	pub fn details_hash(&self) -> [u8; 32] {
+	pub fn details_hash(&mut self) {
 
 		let chain_bytes: Vec<u8> = (&self.chain_id).into();
-
 		let counter_bytes: Vec<u8> = (&self.counter).into();
-
 		let value_bytes: Vec<u8> = (&self.value).into();
 
-		fides::merkle_tree::root(
+		self.details_hash = fides::merkle_tree::root(
 			fides::hash::blake_3,
 			&[
 				&chain_bytes,
@@ -39,6 +39,18 @@ impl Transaction {
 				&self.recipient.0,
 				&self.sender.0,
 				&value_bytes
+			]
+		)
+
+	}
+
+	pub fn hash(&mut self) {
+
+		self.hash = fides::merkle_tree::root(
+			fides::hash::blake_3,
+			&[
+				&self.details_hash,
+				&self.signature
 			]
 		)
 
@@ -117,7 +129,7 @@ impl Storage {
 
 		let chain_id = ChainID::try_from(&detail_objects[0].data[..])?;
 
-		let transaction = Transaction {
+		let mut transaction = Transaction {
 			chain_id,
 			counter: detail_objects[1].data[..].into(),
 			data: detail_objects[2].data.clone(),
@@ -125,9 +137,19 @@ impl Storage {
 			sender: Address(detail_objects[4].data[..].try_into()?),
 			signature: transaction_objects[1].data[..].try_into()?,
 			value: detail_objects[5].data[..].into(),
+			details_hash: [0_u8;32],
+			hash: [0_u8;32],
 		};
 
-		Ok(transaction)
+		transaction.details_hash();
+
+		transaction.hash();
+
+		if &transaction.hash == transaction_hash {
+			Ok(transaction)
+		} else {
+			Err("Hash error!")?
+		}
 
 	}
 

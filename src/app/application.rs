@@ -80,10 +80,7 @@ impl Transaction {
 
                             changed_accounts.insert(self.recipient, recipient);
 
-                            Ok(Receipt {
-                                solar_used,
-                                status: Status::Accepted
-                            })
+                            Ok(Receipt::new(solar_used, Status::Accepted))
 
                         },
 
@@ -93,10 +90,7 @@ impl Transaction {
 
                             changed_accounts.insert(self.sender, sender);
 
-                            Ok(Receipt {
-                                solar_used,
-                                status: Status::BalanceError
-                            })
+                            Ok(Receipt::new(solar_used, Status::BalanceError))
 
                         },
 

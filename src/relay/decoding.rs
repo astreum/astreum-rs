@@ -6,7 +6,7 @@ impl Relay {
 
     pub fn decoding(&self) -> Result<(), Box<dyn Error>> {
 
-        let ping_message = self.ping_message.clone();
+        let ping_pointer = self.ping_pointer.clone();
 
         let incoming_queue_pointer = self.incoming_queue_pointer.clone();
 
@@ -82,6 +82,18 @@ impl Relay {
                                                             Some(_) => (),
 
                                                             None => {
+
+                                                                let ping = match ping_pointer.lock() {
+                                                                    Ok(ping) => ping.clone(),
+                                                                    Err(_) => continue,
+                                                                };
+                                            
+                                                                let ping_bytes: Vec<u8> = ping.into();
+                                            
+                                                                let ping_message = Message {
+                                                                    body: ping_bytes,
+                                                                    topic: Topic::Ping,
+                                                                };
 
                                                                 match outgoing_queue_pointer.lock() {
                                                                 
@@ -164,6 +176,18 @@ impl Relay {
                                                         }
                                                         
                                                     }
+
+                                                    let ping = match ping_pointer.lock() {
+                                                        Ok(ping) => ping.clone(),
+                                                        Err(_) => continue,
+                                                    };
+                                
+                                                    let ping_bytes: Vec<u8> = ping.into();
+                                
+                                                    let ping_message = Message {
+                                                        body: ping_bytes,
+                                                        topic: Topic::Ping,
+                                                    };
 
                                                     match outgoing_queue_pointer.lock() {
                                                         
@@ -252,18 +276,6 @@ impl Relay {
 
                                                 }
                                             
-                                            },
-
-                                            Topic::State => {
-
-                                                // if better than valid chain add to proposed chains
-                                                
-                                            },
-
-                                            Topic::StateRequest => {
-
-                                                // send longest valid chain hash
-
                                             },
 
                                             Topic::Transaction => {

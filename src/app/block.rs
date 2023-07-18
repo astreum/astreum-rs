@@ -6,20 +6,21 @@ use super::{chain::ChainID, address::Address};
 
 #[derive(Clone, Debug)]
 pub struct Block {
-   pub accounts: [u8; 32],
+   pub accounts: [u8;32],
    pub chain_id: ChainID,
    pub data: Vec<u8>,
    pub delay_difficulty: u64,
    pub delay_output: Vec<u8>,
-   pub hash: [u8; 32],
+   pub details_hash: [u8;32],
+   pub hash: [u8;32],
    pub miner: Address,
    pub number: opis::Integer,
-   pub previous_block: [u8; 32],
-   pub receipts: [u8; 32],
-   pub signature: [u8; 64],
+   pub previous_block: [u8;32],
+   pub receipts: [u8;32],
+   pub signature: [u8;64],
    pub solar_used: u64,
    pub time: u64,
-   pub transactions: [u8; 32],
+   pub transactions: [u8;32],
 }
 
 #[derive(Clone, Debug)]
@@ -54,16 +55,17 @@ impl Block {
             solar_used: 0,
             time: 1,
             transactions: [0_u8; 32],
-            miner: Address([0_u8; 32])
+            miner: Address([0_u8; 32]),
+            details_hash: [0_u8;32],
         }
     }
 
-    pub fn sign(&mut self, secret_key: &[u8; 32]) -> Result<(), Box<dyn Error>> {
-        self.signature = fides::ed25519::sign(&self.details_hash(), secret_key)?;
+    pub fn signature(&mut self, secret_key: &[u8; 32]) -> Result<(), Box<dyn Error>> {
+        self.signature = fides::ed25519::sign(&self.details_hash, secret_key)?;
         Ok(())
     }
 
-    pub fn details_hash(&self) -> [u8; 32] {
+    pub fn details_hash(&mut self) {
 
         let chain_bytes: Vec<u8> = (&self.chain_id).into();
 
@@ -75,7 +77,7 @@ impl Block {
 
         let time_bytes: Vec<u8> = opis::Integer::from(&self.time).into();
 
-        fides::merkle_tree::root(
+        self.details_hash = fides::merkle_tree::root(
             fides::hash::blake_3,
             &[
                 &self.accounts,
@@ -95,16 +97,12 @@ impl Block {
         )
     
     }
-    
-    pub fn update_hash(&mut self) {
-        self.hash = self.hash()
-    }
 
-    pub fn hash(&self) -> [u8; 32] {
-        fides::merkle_tree::root(
+    pub fn hash(&mut self) {
+        self.hash = fides::merkle_tree::root(
             fides::hash::blake_3,
             &[
-                &self.details_hash(),
+                &self.details_hash,
                 &self.signature
             ]
         )
@@ -132,6 +130,7 @@ impl TryFrom<&[u8]> for Block {
                solar_used: (&opis::Integer::try_from(block_details[11]).unwrap_or(Err("Block number error!")?)).into(),
                time: u64::from_be_bytes(block_details[12].try_into().unwrap_or(Err("Block time error!")?)),
                transactions: block_details[14].clone().try_into().unwrap_or(Err("Validator error!")?),
+                details_hash: [0_u8;32],
            };
            Ok(block)
        } else {
@@ -205,8 +204,10 @@ impl Storage {
             solar_used: u64::from_be_bytes(detail_objects[9].data[..].try_into()?),
             time: u64::from_be_bytes(detail_objects[10].data[..].try_into()?),
             transactions: detail_objects[11].data[..].try_into()?,
+            details_hash: [0_u8;32],
         };
-        block.update_hash();
+        block.details_hash();
+        block.hash();
         Ok(block)
     }
 }

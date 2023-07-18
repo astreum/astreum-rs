@@ -4,23 +4,33 @@ use crate::storage::Storage;
 
 #[derive(Clone, Debug)]
 pub struct Receipt {
+	pub hash: [u8;32],
 	pub solar_used: u64,
-	pub status: Status
+	pub status: Status,
 }
 
 impl Receipt {
 
-pub fn hash(&self) -> [u8; 32] {
+pub fn hash(&mut self) {
+
 	let solar_used_bytes: Vec<u8> = opis::Integer::from(&self.solar_used).into();
 	let status_bytes: Vec<u8> = (&self.status).into();
-	fides::merkle_tree::root(fides::hash::blake_3, &[&solar_used_bytes, &status_bytes])
+
+	self.hash = fides::merkle_tree::root(
+		fides::hash::blake_3,
+		&[&solar_used_bytes, &status_bytes]
+	)
+
 }
 
-pub fn new() -> Self {
-	Receipt {
-		solar_used: 0,
-		status: Status::BalanceError
-	}
+pub fn new(solar_used: u64, status: Status) -> Self {
+	let mut receipt = Receipt {
+		solar_used,
+		status,
+		hash: [0_u8;32],
+	};
+	receipt.hash();
+	receipt
 }
 
 }
@@ -75,6 +85,7 @@ pub fn get_receipt(&self, receipt_hash: &[u8;32]) -> Result<Receipt, Box<dyn Err
 	let receipt = Receipt {
 		solar_used: u64::from_be_bytes(receipt_objects[0].data[..].try_into()?),
 		status: Status::try_from(&receipt_objects[1].data[..])?,
+		hash: [0_u8;32],
 	};
 
 	Ok(receipt)

@@ -61,13 +61,6 @@ impl Relay {
     		chain: latest_block_hash,
 		};
 
-		let ping_bytes: Vec<u8> = ping.into();
-
-		let ping_message = Message {
-			body: ping_bytes,
-			topic: Topic::Ping,
-		};
-
 		let app = Relay {
 			validator,
 			object_store_pointer,
@@ -82,7 +75,7 @@ impl Relay {
 			gets_queue_pointer,
     		storage_index: HashMap::new(),
 			peers_pointer: Arc::new(Mutex::new(HashMap::new())),
-			ping_message,
+			ping_pointer: Arc::new(Mutex::new(ping)),
 		};
 
 		Ok(app)

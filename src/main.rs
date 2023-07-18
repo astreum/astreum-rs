@@ -59,7 +59,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                     let app = App::new(chain_id, true)?;
                     app.sync()?;
                     app.validate()?;
-                    app.mine(&account_key)?;
+                    app.mine(account_key)?;
                     loop {}
                 } else {
                     Err("Use mine [chain id] [address]")?

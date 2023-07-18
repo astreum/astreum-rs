@@ -7,7 +7,8 @@ use super::address::Address;
 pub struct Account {
     pub balance: opis::Integer,
     pub counter: opis::Integer,
-    pub storage: [u8; 32],
+    pub details_hash: [u8;32],
+    pub storage: [u8;32],
 }
 
 impl Account {
@@ -16,7 +17,8 @@ impl Account {
         Account {
             balance: opis::Integer::zero(),
             counter: opis::Integer::zero(),
-            storage: [0_u8; 32],
+            storage: [0_u8;32],
+            details_hash: [0_u8;32],
         }
     }
 
@@ -46,10 +48,12 @@ impl Account {
         }
     }
 
-    pub fn details_hash(&self) -> [u8; 32] {
+    pub fn details_hash(&mut self) {
+        
         let balance: Vec<u8> = (&self.balance).into();
         let counter: Vec<u8> = (&self.counter).into();
-        fides::merkle_tree::root(
+        
+        self.details_hash = fides::merkle_tree::root(
             fides::hash::blake_3,
             &[
                 &balance,
@@ -72,11 +76,17 @@ impl Storage {
         let balance = opis::Integer::from(&detail_objects[0].data[..]);
         let counter = opis::Integer::from(&detail_objects[1].data[..]);
         let storage = detail_objects[2].hash();
-        Ok(Account {
+
+        let mut account = Account {
             balance,
             counter,
             storage,
-        })
+            details_hash: [0_u8;32],
+        };
+
+        account.details_hash();
+
+        Ok(account)
     }
 }
 
@@ -84,12 +94,14 @@ impl TryFrom<&[u8]> for Account {
     fn try_from(arg: &[u8]) -> Result<Self, Box<dyn Error>> {
         let account_fields = astro_format::decode(arg)?;
         if account_fields.len() == 3 {
-            let mut result = Account {
+            let mut account = Account {
                 balance: opis::Integer::from(account_fields[0]),
                 counter: opis::Integer::from(account_fields[1]),
                 storage: account_fields[2].try_into()?,
+                details_hash: [0_u8;32],
             };
-            Ok(result)
+            account.details_hash();
+            Ok(account)
         } else {
             Err("Account fields error!")?
         }

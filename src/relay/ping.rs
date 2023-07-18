@@ -6,19 +6,13 @@ pub struct Ping {
 }
 
 impl Into<Vec<u8>> for Ping {
-   
    fn into(self) -> Vec<u8> {
-      
       (&self).into()
-   
    }
-   
 }
 
 impl Into<Vec<u8>> for &Ping {
-
    fn into(self) -> Vec<u8> {
-      
       astro_format::encode(&[
          &self.chain[..],
          &self.public_key[..],
@@ -28,9 +22,7 @@ impl Into<Vec<u8>> for &Ping {
             &[0_u8]
          }
       ])
-
    }
-
 }
 
 impl TryFrom<&[u8]> for Ping {

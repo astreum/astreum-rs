@@ -1,12 +1,12 @@
 use std::{error::Error, thread, time::{Instant, SystemTime}};
 
-use super::Relay;
+use super::{Relay, message::Message, topic::Topic};
 
 impl Relay {
 
     pub fn liveness(&self) -> Result<(), Box<dyn Error>> {
 
-        let ping_message = self.ping_message.clone();
+        let ping_pointer = self.ping_pointer.clone();
 
         let peers_pointer = self.peers_pointer.clone();
 
@@ -23,6 +23,19 @@ impl Relay {
 			loop {
 
 				if Instant::now().duration_since(now).as_secs() > 30 {
+
+                    let ping = match ping_pointer.lock() {
+                        Ok(ping) => ping.clone(),
+                        Err(_) => continue,
+                    };
+
+                    let ping_bytes: Vec<u8> = ping.into();
+
+                    let ping_message = Message {
+                        body: ping_bytes,
+                        topic: Topic::Ping,
+                    };
+
 
                     match peers_pointer.lock() {
                         

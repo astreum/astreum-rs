@@ -40,7 +40,7 @@ impl App {
 
 		let object_store_pointer = Arc::new(Mutex::new(object_store));
 
-		let relay = Relay::new(latest_block.hash(), object_store_pointer.clone(), validator)?;
+		let relay = Relay::new(latest_block.hash, object_store_pointer.clone(), validator)?;
 
 		relay.start()?;
 

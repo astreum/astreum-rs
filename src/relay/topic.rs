@@ -7,8 +7,6 @@ pub enum Topic {
     Ping,
     Route,
     RouteRequest,
-    State,
-    StateRequest,
     Transaction,
 }
 
@@ -28,9 +26,7 @@ impl Into<Vec<u8>> for &Topic {
             Topic::Ping => vec![2],
             Topic::Route => vec![3],
             Topic::RouteRequest => vec![4],
-            Topic::State => vec![5],
-            Topic::StateRequest => vec![6],
-            Topic::Transaction => vec![7],
+            Topic::Transaction => vec![5],
         }
 
     }
@@ -49,9 +45,7 @@ impl TryFrom<&[u8]> for Topic {
             [2] => Ok(Topic::Ping),
             [3] => Ok(Topic::Route),
             [4] => Ok(Topic::RouteRequest),
-            [5] => Ok(Topic::State),
-            [6] => Ok(Topic::StateRequest),
-            [7] => Ok(Topic::Transaction),
+            [5] => Ok(Topic::Transaction),
             _ => Err("topic decoding error!")?
         }
 
