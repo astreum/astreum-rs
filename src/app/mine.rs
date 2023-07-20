@@ -109,7 +109,7 @@ impl App {
                   };
 
                   miner_account.balance += match opis::Integer::from_dec("1000000000000") {
-                     Ok(account) => account,
+                     Ok(reward) => reward,
                      Err(_) => continue,
                   };
 

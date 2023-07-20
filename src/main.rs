@@ -2,7 +2,7 @@ use std::{error::Error, env, path::Path, fs};
 
 use app::address::Address;
 
-use crate::app::{App, chain::ChainID};
+use crate::{app::{App, chain::ChainID, transaction::Transaction}, relay::{message::Message, topic::Topic, route::RouteID}};
 mod app;
 mod relay;
 mod storage;
@@ -68,11 +68,58 @@ fn main() -> Result<(), Box<dyn Error>> {
 
             "send" => {
                 println!("Sending Solar ...");
+                if args.len() == 9 {
+                    let chain_id = ChainID::try_from(&args[4][..])?;
+                    let app = App::new(chain_id.clone(), true)?;
+                    app.sync()?;
+                    // connect
+                    let account_key_path_str = format!("./keys/{:?}", &args[6]);
+                    let account_key_path = Path::new(&account_key_path_str);
+                    let account_key: [u8;32] = fs::read(account_key_path)?[..].try_into()?;
+                    let sender: Address = args[6][..].try_into()?;
+                    let recipient: Address = args[9][..].try_into()?;
+                    let accounts = match app.latest_block_pointer.lock() {
+                        Ok(latest_block) => latest_block.accounts,
+                        Err(_) => Err("Latest Block Pointer Error!")?,
+                    };
+                    let counter = match app.storage_pointer.lock() {
+                        Ok(storage) => match storage.get_account(&accounts, &sender) {
+                            Ok(account) => account.counter,
+                            Err(_) => Err("Get Account Error!")?,
+                        },
+                        Err(_) => Err("Storage Pointer Error!")?,
+                    };
+                    let mut tx = Transaction {
+                        chain_id,
+                        counter,
+                        data: Vec::new(),
+                        details_hash: [0_u8;32],
+                        hash: [0_u8;32],
+                        recipient,
+                        sender,
+                        signature: [0_u8;64],
+                        value: opis::Integer::from_dec(&args[2])?,
+                    };
 
-            },
+                    tx.details_hash();
+                    tx.signature(&account_key)?;
+                    tx.hash();
 
-            "stake" => {
-                println!("Staking ...");
+                    let tx_msg = Message {
+                        body: tx.hash.to_vec(),
+                        topic: Topic::Transaction,
+                    };
+
+                    match app.relay_pointer.clone().lock() {
+                        Ok(relay) => {
+                            relay.broadcast(RouteID::Consensus, tx_msg)?;
+                        },
+                        Err(_) => Err("Relay Pointer Error!")?,
+                    }
+
+                    // check execution
+                    
+                }
             },
 
             "withdraw" => {
@@ -99,12 +146,12 @@ fn help() {
 Help
 - - - + - - - + - - -
 
-new ................................................... creates a new account
-sync [chain] .......................................... validates the blockchain
-mine [chain] [address] ................................ extends the blockchain
-stake [chain] [address] [value] ....................... adds stake
-withdraw [chain] [address] [value] .................... removes stake
+new ................................................... create account
+sync [chain] .......................................... check blocks
+mine [chain] [address] ................................ create blocks
 send [value] on [chain] from [address] to [address] ... send solar
+withdraw [chain] [address] [value] .................... removes stake
+
 
     "###);
 

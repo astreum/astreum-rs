@@ -45,12 +45,11 @@ CLI Commands:
 
 ```
 help .................................................. lists commands
-new ................................................... creates a new account
-sync [chain] .......................................... validates the blockchain
-mine [chain] [address] ................................ extends the blockchain
-stake [chain] [address] [value] ....................... adds stake
-withdraw [chain] [address] [value] .................... removes stake
+new ................................................... create account
+sync [chain] .......................................... check blocks
+mine [chain] [address] ................................ create blocks
 send [value] on [chain] from [address] to [address] ... send solar
+withdraw [chain] [address] [value] .................... removes stake
 ```
 
 ## License
@@ -81,4 +80,4 @@ SOFTWARE.
 
 Roy R. O. Okello
 
-12023-07-19
+12023-07-20

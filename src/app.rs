@@ -20,9 +20,9 @@ pub mod transaction;
 pub mod validate;
 
 pub struct App {
-   chains_pointer: Arc<Mutex<HashMap<[u8;32], Chain>>>,
-   latest_block_pointer: Arc<Mutex<Block>>,
-   pending_transactions_pointer: Arc<Mutex<HashMap<[u8;32],Transaction>>>,
-   relay_pointer: Arc<Mutex<Relay>>,
-   storage_pointer: Arc<Mutex<Storage>>,
+   pub chains_pointer: Arc<Mutex<HashMap<[u8;32], Chain>>>,
+   pub latest_block_pointer: Arc<Mutex<Block>>,
+   pub pending_transactions_pointer: Arc<Mutex<HashMap<[u8;32],Transaction>>>,
+   pub relay_pointer: Arc<Mutex<Relay>>,
+   pub storage_pointer: Arc<Mutex<Storage>>,
 }
