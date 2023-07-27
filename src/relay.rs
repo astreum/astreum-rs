@@ -41,18 +41,6 @@ pub struct Relay {
 
 impl Relay {
 
-    pub fn nearest_peer(&self, hash: &[u8;32]) -> Result<IpAddr, Box<dyn Error>> {
-
-        todo!()
-
-    }
-
-    pub fn random_peer(&self, hash: &[u8;32]) -> Result<IpAddr, Box<dyn Error>> {
-
-        todo!()
-
-    }
-
     pub fn local_get_object(&self, object_hash: &[u8;32]) -> Result<Object, Box<dyn Error>> {
         match self.object_store_pointer.lock() {
             Ok(object_store) => {
