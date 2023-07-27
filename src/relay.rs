@@ -1,5 +1,6 @@
 mod broadcast;
 mod bucket;
+mod connect;
 mod chain;
 mod new;
 mod decoding;

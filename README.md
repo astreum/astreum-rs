@@ -25,7 +25,7 @@ Official Astreum Node written in Rust.
 - Create Transactions
 - Sync & Validate the Blockchain
 - Mine Blocks
-- Stake & Withdraw Solar from Consensus Account
+- Stake Solar
 
 ## Usage
 
@@ -49,7 +49,6 @@ new ................................................... create account
 sync [chain] .......................................... check blocks
 mine [chain] [address] ................................ create blocks
 send [value] on [chain] from [address] to [address] ... send solar
-withdraw [chain] [address] [value] .................... removes stake
 ```
 
 ## License
@@ -77,7 +76,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
-Roy R. O. Okello
-
-12023-07-20

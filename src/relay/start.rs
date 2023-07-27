@@ -8,6 +8,7 @@ impl Relay {
         self.decoding()?;
         self.outgoing()?;
         self.liveness()?;
+        self.connect()?;
         Ok(())
     }
 }

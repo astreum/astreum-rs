@@ -13,7 +13,23 @@ const STELAR_ADDRESS: Address = Address([0, 1, 2, 3, 4, 0, 0, 0, 0, 0, 0, 0, 0, 
 
 fn main() -> Result<(), Box<dyn Error>> {
 
-    println!("Astreum Rust v0.1.0");
+    println!(r###"
+    *      .       *    .               *     .    *          *
+    .  .        .           *    .     *  .            .
+        *   .      *           *               * .       *    .   .
+        .                     *    .    * .            .         .   .   .
+    
+     .vvv.    .vvv.  .vvvvv.  .vvvv.   .vvvv.  .v   v.  .v.     .v.
+    .v   v.  .v         v     .v   v.  .v      .v   v.  .v v   v v.
+    .vvvvv.   .vv.      v     .vvvv.   .vvv.   .v   v.  .v  v v  v.
+    .v   v.      v.     v     .v  v.   .v      .v   v.  .v   v   v.
+    .v   v.  .vvv.      v     .v   v.  .vvvv.   .vvv.   .v       v.  .v.
+    
+    Astreum Rs v0.1.0
+    Author: Roy R. O. Okello
+    Copyright Astreum Foundation. All Rights Reserved
+
+    "###);
 
     let args: Vec<String> = env::args().collect();
 
@@ -45,7 +61,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                     app.validate()?;
                     loop {}
                 } else {
-                    Err("Use sync [chain id]")?
+                    Err("Use: sync [chain id]")?
                 }
             },
 
@@ -62,7 +78,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                     app.mine(account_key)?;
                     loop {}
                 } else {
-                    Err("Use mine [chain id] [address]")?
+                    Err("Use: mine [chain id] [address]")?
                 }
             },
 
@@ -72,7 +88,6 @@ fn main() -> Result<(), Box<dyn Error>> {
                     let chain_id = ChainID::try_from(&args[4][..])?;
                     let app = App::new(chain_id.clone(), true)?;
                     app.sync()?;
-                    // connect
                     let account_key_path_str = format!("./keys/{:?}", &args[6]);
                     let account_key_path = Path::new(&account_key_path_str);
                     let account_key: [u8;32] = fs::read(account_key_path)?[..].try_into()?;
@@ -122,10 +137,6 @@ fn main() -> Result<(), Box<dyn Error>> {
                 }
             },
 
-            "withdraw" => {
-                println!("Withdraw ...");
-            },
-
             _ => help()
 
         }
@@ -150,7 +161,6 @@ new ................................................... create account
 sync [chain] .......................................... check blocks
 mine [chain] [address] ................................ create blocks
 send [value] on [chain] from [address] to [address] ... send solar
-withdraw [chain] [address] [value] .................... removes stake
 
 
     "###);
